@@ -1,0 +1,7 @@
+/target
+/VeriTas
+
+/test/*.json
+/test/*.txt
+
+/Cargo.lock
