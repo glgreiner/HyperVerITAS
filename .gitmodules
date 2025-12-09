@@ -1,0 +1,6 @@
+[submodule "hyperplonk"]
+	path = hyperplonk
+	url = https://github.com/glgreiner/hyperplonk.git
+[submodule "plonkish_basefold"]
+	path = plonkish_basefold
+	url = https://github.com/glgreiner/plonkish_basefold.git
