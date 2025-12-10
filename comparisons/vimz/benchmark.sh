@@ -65,8 +65,8 @@ resolution=$1
 shift
 
 # Validate resolution argument
-if [[ "$resolution" != "HD" && "$resolution" != "4K" && "$resolution" != "19" && "$resolution" != "20" && "$resolution" != "21" && "$resolution" != "22" && "$resolution" != "23" && "$resolution" != "24" && "$resolution" != "25"]]; then
-    echo "Invalid resolution. Use 'HD' or '4K'."
+if [[ ! "$resolution" =~ ^(19|20|21|22|23|24|25)$ ]]; then
+    echo "Invalid resolution. Use '19', '20', '21', '22', '23', '24', or '25'."
     exit 1
 fi
 
@@ -128,3 +128,6 @@ done
 run_commands "${commands[@]}"
 
 rm -rf .tmp_runs
+
+# get proof size
+python ./py_modules/get_proof_size.py "${resolution}" "$1"

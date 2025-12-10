@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import json
 
 
@@ -51,13 +52,23 @@ def determine_proof_size(filename):
     print(f"\nProof Size (in KB): {kb_total}")
   
 
-def format_and_determine():
-    filename = input("Provide the path to the json proof file:\n")
-
+def format_and_determine(filename):
     # format it as needed
     out_file = format_proof_file(filename)
 
     # determine the actual proof size
     determine_proof_size(out_file)
 
-format_and_determine()
+
+if len(sys.argv) < 3:
+    print("Usage: python get_proof_size.py <resolution> <transformation>")
+    sys.exit(1)
+
+resolution = sys.argv[1]
+transformation = sys.argv[2]
+
+filename = f"{transformation}_{resolution}.json"
+
+print(f"Input: {filename}")
+
+format_and_determine(filename)
