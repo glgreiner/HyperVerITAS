@@ -1,0 +1,5 @@
+/target
+
+/images/*.txt
+
+/output/*.txt
