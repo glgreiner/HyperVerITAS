@@ -9,7 +9,6 @@ Requested Badge(s):
 
 
 ## Description (Required for all badges)
-Replace this with the following:
 
 1. HyperVerITAS: Verifying Image Transformations at Scale on Boolean Hypercubes
 2. This artifact contains an implementation of our proof system, as well as extensions of prior work that we compare to.
