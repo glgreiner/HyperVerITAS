@@ -36,17 +36,25 @@ Implementation for the HyperVerITAS proof system
 #### Creating Sample Images
 
   - Ensure that you are in `hyperveritas_impl/images`
+    
   - Ensure that you have the `hyperveritas` python environment activated
+    
   - Run the command: `python helper.py`
+    
     - This will create images of size 2^17, 2^18, ..., 2^25
 
 ## Benchmarks
 
   - To run the code, navigate to `HyperVerITAS/hyperveritas_impl/`
+    
   - Run the commmand: `time -v cargo run --release --example <filename> <size>`.
+    
   - If you want to view all of the options for `filename`, go to the `hyperveritas_impl/examples` directory
-    - Any file that starts with `hv` is an option for `<filename>`  
+    
+    - Any file that starts with `hv` is an option for `<filename>`
+      
   - Some example usage:
+    
     - HyperVerITAS with Brakedown PCS, Cropping 50%, Image size 2^19
       
       - `time -v cargo run --release --example hv_crop_brakedown 19`
