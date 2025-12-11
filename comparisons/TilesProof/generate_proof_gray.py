@@ -22,7 +22,7 @@ def tile_proof(tile_idx,pot_path):
                          'SETUP':f'time -v ./scripts/proving_system/setup_prover.sh {circuit_name} {pot_path}',
                          'PROVE':f'time -v ./scripts/proving_system/prover.sh {circuit_name} '}.items():
         start = time.time()
-        res = subprocess.run(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        res = subprocess.run(command, shell=True, universal_newlines=True)
         end = time.time()
         print(f"Elapsed time: {end - start:.4f} seconds")
         if res.returncode != 0:
