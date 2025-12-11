@@ -1,6 +1,8 @@
 # HyperVerITAS
 Implementation for the HyperVerITAS proof system
 
+We also include code for performing a fair comparison with VerITAS, VIMz, and TilesProof. See the `comparisons` directory for more information.
+
 ## Installation
 
 ### Dependencies
