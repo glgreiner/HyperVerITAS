@@ -10,6 +10,9 @@ RAPIDSNARK=../rapidsnark/package/bin/prover
 
 cd output/snarkjs_circuit/${CIRCUIT_NAME}
 
+echo "Rapidsnark is: $RAPIDSNARK"
+
+
 if [ -f "$RAPIDSNARK" ]; then
     ${RAPIDSNARK} circuit_final.zkey ${WITNESS} proof.json public.json
 else

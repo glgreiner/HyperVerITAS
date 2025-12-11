@@ -18,9 +18,10 @@ def tile_proof(tile_idx,pot_path):
     print('\n====================================')
     print(f'Generating proof for tile {tile_idx}')
 
-    for name,command in {'COMPILE':f'time -v ./scripts/compile_circuit.sh ./circuits/tiles/{circuit_name}.circom {input_path} --nodejs',
-                         'SETUP':f'time -v ./scripts/proving_system/setup_prover.sh {circuit_name} {pot_path}',
-                         'PROVE':f'time -v ./scripts/proving_system/prover.sh {circuit_name} '}.items():
+    # for name,command in {'COMPILE':f'time -v ./scripts/compile_circuit.sh ./circuits/tiles/{circuit_name}.circom {input_path} --nodejs',
+    #                      'SETUP':f'time -v ./scripts/proving_system/setup_prover.sh {circuit_name} {pot_path}',
+    #                      'PROVE':f'time -v ./scripts/proving_system/prover.sh {circuit_name} '}.items():
+    for name,command in {'PROVE':f'time -v ./scripts/proving_system/prover.sh {circuit_name} '}.items():
         start = time.time()
         res = subprocess.run(command, shell=True, universal_newlines=True)
         end = time.time()
