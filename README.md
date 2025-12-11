@@ -1,5 +1,5 @@
 # HyperVerITAS
-Implementation for the HyperVerITAS proof system
+This repository contains the implementation for the HyperVerITAS proof system (crop and grayscale transformations). It supports a variety of Multilinear PCS: PST, Brakedown, Basefold, BasefoldFri, and ZeromorphFri. The code for HyperVerITAS is contained in the `hyperveritas_impl` directory. 
 
 We also include code for performing a fair comparison with VerITAS, VIMz, and TilesProof. See the `comparisons` directory for more information.
 
