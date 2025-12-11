@@ -28,6 +28,10 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 
 Ensure that you are in the `HyperVerITAS/comparisons/VerITAS_FRI` directory.
 
+Next, create a new directory to hold some output information:
+
+- `mkdir output`
+
 To run the Full System Implementation for VerITAS FRI, run the following commands:
 
 - Crop: `/usr/bin/time -v cargo run --release --example fullCropFri <size>`
