@@ -7,18 +7,19 @@ set -e
 echo "Use Rust nightly..."
 rustup default nightly
 
-# 2. Initialize Python environment
-echo "Setting up Python virtual environment..."
-cd hyperveritas_impl
-python3 -m venv hyperveritas
-source hyperveritas/bin/activate
+# 2. Make output directory
+mkdir output
 
-# 3. Install Python dependencies
+# 3. Initialize Python environment
+echo "Setting up Python virtual environment..."
 cd images
+python3 -m venv veritas_fri
+source veritas_fri/bin/activate
 pip install -r requirements.txt
 
 # 4. Run helper.py
 echo "Running helper.py to generate images..."
 python helper.py
 
-echo "All done! HyperVerITAS is setup. Images should be generated."
+
+echo "All done! VerITAS FRI is setup. Images should be generated."
