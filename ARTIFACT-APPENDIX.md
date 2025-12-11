@@ -35,7 +35,7 @@ as follows.
 
 1. Used Ubuntu 24.04 for the artifcat evaluation. The artifact has also run on MacOS (what we used to get results in the paper), but the instructions included in the github won't work for MacOS.
 2. Included in install scripts
-3. Didn't use docker, have install scripts;.
+3. Didn't use docker, have install scripts.
 4. We use Rust and Python in our artifact. Specifically, we use Python 3.12.1 and primarily latest version of Rust.
 5. See requirements files in the github repos, as well as explanations in the READMEs
 6. None
