@@ -7,12 +7,8 @@ CIRCUIT_NAME=$1
 CIRCUIT_DIR=$(readlink -f ./output/compiled_circuit/compiled_${CIRCUIT_NAME})
 WITNESS="${CIRCUIT_DIR}/${CIRCUIT_NAME}_witness.wtns"
 RAPIDSNARK=$(readlink -f ../rapidsnark/package/bin/prover)
-# RAPIDSNARK=~/HyperVerITAS/comparisons/rapidsnark/package/bin/prover
 
 cd output/snarkjs_circuit/${CIRCUIT_NAME}
-
-echo "Rapidsnark is: $RAPIDSNARK"
-
 
 if [ -f "$RAPIDSNARK" ]; then
     ${RAPIDSNARK} circuit_final.zkey ${WITNESS} proof.json public.json
