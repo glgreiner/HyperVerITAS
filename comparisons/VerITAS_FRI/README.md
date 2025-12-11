@@ -1,4 +1,6 @@
 ## VerITAS FRI
+This implementation is a fork of the github repository VerITAS found <a href="https://github.com/zk-VerITAS/VerITAS.git">here</a>.
+
 This directory contains the Full System Implementation for VerITAS's proof system with the FRI Univariate PCS. The original imlpementation only had code for one-channel image transformation proofs and hash pre-image proofs. We took their one-channel code from the original repository, and made 3-channel variants via parallelization (as is suggested in the VerITAS paper) to enable a fair comparison with HyperVerITAS. 
 
 ## Installation and Setup
