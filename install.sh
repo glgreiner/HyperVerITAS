@@ -10,7 +10,7 @@ git submodule update --init
 echo "Installing Rust nightly..."
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # Source Rust environment
-. "$HOME/.cargo/env"
+source ~/.bashrc
 echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
 rustup install nightly
 rustup default nightly
@@ -54,7 +54,8 @@ sudo apt-get install build-essential cmake libgmp-dev libsodium-dev nasm curl m4
 sudo apt-get install libgl1
 git clone https://github.com/iden3/rapidsnark.git
 cd rapidsnark
-git submodule update -—init
+git submodule init
+git submodule update
 ./build_gmp.sh host
 make host
 
