@@ -27,6 +27,7 @@ sudo apt install -y time
 # 5. Install nodejs + snarkjs
 echo "Installing nodejs"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
 source ~/.bashrc
 nvm install v16.20.0
 
