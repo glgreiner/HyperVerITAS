@@ -21,11 +21,15 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 
 - Crop:
 
-  ```/usr/bin/time -v cargo run --release --example fullCropFri <size>```
+  ```
+  /usr/bin/time -v cargo run --release --example fullCropFri <size>
+  ```
 
 - Grayscale:
 
-```/usr/bin/time -v cargo run --release --example fullGrayFri <size>```
+```
+/usr/bin/time -v cargo run --release --example fullGrayFri <size>
+```
 
 - Note `<size>` is the input size (2^size number of pixels). Valid choices are numbers between 19-25.
 
