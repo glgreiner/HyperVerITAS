@@ -6,8 +6,7 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 > [!NOTE]
 > If you have not already installed the necessary dependencies (Rust, Python, time), install them as described <a href=https://github.com/glgreiner/HyperVerITAS/blob/main/README.md#dependencies>here</a>.
 
-If you have not already installed the necessary dependencies (Rust, Python, time), install them as described <a href=https://github.com/glgreiner/HyperVerITAS/blob/main/README.md#dependencies>here</a>.
-
+First, ensure you are in this directory `HyperVerITAS/comparisons/VerITAS_FRI`
 
 To create the images needed to run the code, run the python script:
 
