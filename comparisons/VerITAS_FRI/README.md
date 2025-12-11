@@ -8,6 +8,7 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 1) Ensure you are in the directory: `HyperVerITAS/comparisons/VerITAS_FRI`
 
 2) Run the setup script as follows:
+   
 ```./veritas_fri_setup.sh```
 
 ## Benchmarks
@@ -16,10 +17,14 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 
 2) To run the Full System Implementation for VerITAS FRI, run the following commands:
 
-- Crop: `/usr/bin/time -v cargo run --release --example fullCropFri <size>`
+- Crop:
 
-- Grayscale: `/usr/bin/time -v cargo run --release --example fullGrayFri <size>`
+  ```/usr/bin/time -v cargo run --release --example fullCropFri <size>```
 
-Where `<size>` is the input size (2^size number of pixels). Valid choices are numbers between 19-25.
+- Grayscale:
+
+```/usr/bin/time -v cargo run --release --example fullGrayFri <size>```
+
+- Note `<size>` is the input size (2^size number of pixels). Valid choices are numbers between 19-25.
 
 - The command will print out the **Prover Runtime**, **Verifier Runtime**, **Proof Size**, and **Prover Peak Memory**, the four metrics we record in our paper. The prover peak memory is output in the line titled `Maximum resident set size (kbytes)`.
