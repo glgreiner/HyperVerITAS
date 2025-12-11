@@ -9,13 +9,15 @@ This implementation is a fork of the github repository VIMz found <a href="https
 
 ## Benchmarks
 
-1) First, activate the python environment
+1) Ensure you are still in the directory: `HyperVerITAS/comparisons/vimz`
+
+2) Next, activate the python environment
    
 ```
 source py_modules/vimz/bin/activate
 ```
 
-2) Run the benchmark script as follows:
+3) Run the benchmark script as follows:
 
 ```
 ./benchmark.sh <size> <transformation>
