@@ -10,6 +10,7 @@ git submodule update --init
 echo "Installing Rust nightly..."
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # Source Rust environment
+. "$HOME/.cargo/env" 
 source ~/.bashrc
 echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
 rustup install nightly
