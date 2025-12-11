@@ -9,6 +9,7 @@ We also include code for performing a fair comparison with VerITAS, VIMz, and Ti
 > - Ubuntu @ 24.04
 > - rustc @ 1.94.0-nightly
 > - python @ 3.12.1
+>
 > For Reviewers, these instructions have successfully executed on the `Compute VM` provided in HotCRP.
 
 1) Clone the github repo
@@ -27,7 +28,7 @@ source ~/.bashrc
 
 ## HyperVerITAS Setup
 
-- Run the setup script as follows.
+3) Run the setup script as follows.
 ```
 ./hyperveritas_setup.sh
 ```
@@ -51,5 +52,6 @@ source ~/.bashrc
       
       ```/usr/bin/time -v cargo run --release --example hv_crop_brakedown 19```
     - HyperVerITAS with PST PCS, Grayscale, Image size 2^22
+      
       ```/usr/bin/time -v cargo run --release --example hv_gray_pst 22```
   
