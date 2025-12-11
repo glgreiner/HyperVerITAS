@@ -1,4 +1,4 @@
 /target
 
 /images/*.json
-/images/*.txt
+/images/V*.txt

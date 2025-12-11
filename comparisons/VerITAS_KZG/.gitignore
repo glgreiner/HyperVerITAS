@@ -1,5 +1,5 @@
 /target
 
-/images/*.txt
+/images/V*.txt
 
 /output/*.txt
