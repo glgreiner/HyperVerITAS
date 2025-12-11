@@ -9,7 +9,9 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 
 2) Run the setup script as follows:
    
-```./veritas_fri_setup.sh```
+```
+./veritas_fri_setup.sh
+```
 
 ## Benchmarks
 
