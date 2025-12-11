@@ -54,4 +54,6 @@ source ~/.bashrc
     - HyperVerITAS with PST PCS, Grayscale, Image size 2^22
       
       ```/usr/bin/time -v cargo run --release --example hv_gray_pst 22```
+
+  - The command will print out the **Prover Runtime**, **Verifier Runtime**, **Proof Size**, and **Prover Peak Memory**, the four metrics we record in our paper. The prover peak memory is output in the line titled `Maximum resident set size (kbytes)`.
   
