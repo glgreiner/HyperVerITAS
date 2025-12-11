@@ -47,9 +47,9 @@ Implementation for the HyperVerITAS proof system
 
   - To run the code, navigate to `HyperVerITAS/hyperveritas_impl/`
     
-  - Run the commmand: `time -v cargo run --release --example <filename> <size>`.
+  - Run the commmand: `/usr/bin/time -v cargo run --release --example <filename> <size>`.
     
-  - If you want to view all of the options for `filename`, go to the `hyperveritas_impl/examples` directory
+  - If you want to view all of the options for `<filename>`, go to the `hyperveritas_impl/examples` directory
     
     - Any file that starts with `hv` is an option for `<filename>`
       
@@ -57,7 +57,7 @@ Implementation for the HyperVerITAS proof system
     
     - HyperVerITAS with Brakedown PCS, Cropping 50%, Image size 2^19
       
-      - `time -v cargo run --release --example hv_crop_brakedown 19`
+      - `/usr/bin/time -v cargo run --release --example hv_crop_brakedown 19`
     - HyperVerITAS with PST PCS, Grayscale, Image size 2^22
-      - `time -v cargo run --release --example hv_gray_pst 22`
+      - `/usr/bin/time -v cargo run --release --example hv_gray_pst 22`
   
