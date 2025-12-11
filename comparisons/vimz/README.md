@@ -35,3 +35,5 @@ source py_modules/vimz/bin/activate
     - VIMz Grayscale for input image size 2^22
       
     ```./benchmark.sh 22 grayscale```
+
+ - The command will print out the **Prover Runtime**, **Verifier Runtime**, **Proof Size**, and **Prover Peak Memory**, the four metrics we record in our paper. The prover runtime is calculated by adding the times for `RecursiveSNARK creation` and `CompressedSNARK::prove`. Verifier runtime comes from the line with `CompressedSNARK::verify`. The prover peak memory is output in the line titled `Maximum resident set size (kbytes)`.
