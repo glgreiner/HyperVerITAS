@@ -48,7 +48,7 @@ as follows.
 
 ## Environment (Required for all badges)
 
-You should use the Compute VM on HotCRP. You can then clone the github repo and follow instructions from there.
+The Compute VM on HotCRP works well. To get started, clone the github repo on the Compute VM, and follow instructions in the READMEs to build and run the code.
 
 ### Accessibility (Required for all badges)
 
@@ -63,11 +63,6 @@ See the READMEs included in the github repo for how to setup and run the code.
 See the READMEs included in the github repo for how to setup and run the code.
 
 ## Artifact Evaluation (Required for Functional and Reproduced badges)
-
-This section should include all the steps required to evaluate your artifact's
-functionality and validate your paper's key results and claims. Therefore,
-highlight your paper's main results and claims in the first subsection. And
-describe the experiments that support your claims in the subsection after that.
 
 ### Main Results and Claims
 
