@@ -28,7 +28,7 @@ mkdir -p output/compiled_circuit/compiled_${CIRCOM_FILENAME} > /dev/null
 
 # Compile the circuits in the circuit directory
 
-circom ${1} --r1cs --c --output output/compiled_circuit/compiled_${CIRCOM_FILENAME} -l ${CIRCOMLIB_PATH} -l ./circuits/base
+circom ${1} --r1cs --wasm --output output/compiled_circuit/compiled_${CIRCOM_FILENAME} -l ${CIRCOMLIB_PATH} -l ./circuits/base
 
 # Generate the witness
 if [[ $* == *--nodejs* ]]; then

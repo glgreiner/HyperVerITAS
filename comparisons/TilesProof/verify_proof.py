@@ -24,17 +24,6 @@ def verify_tile_proof(circuit_name):
 
 
 if __name__ == '__main__':
-    # parser = argparse.ArgumentParser(description='Generate proof for an image circuit.')
-
-    # parser.add_argument('--image', type=str, required=True, help='Path to the image.')
-    # parser.add_argument('--N', type=int, required=True, help='Number of tiles to split the image into.')
-    # parser.add_argument('--height', type=int, required=True, help='Resize height.')
-    # parser.add_argument('--width', type=int, required=True, help='Resize width.')
-    # parser.add_argument('--pot', type=str, required=True, help='Path to the pot file.')
-
-    # args = parser.parse_args()
-
-    # generate_proof(args.image, args.N, args.height, args.width, args.pot)
 
     parser = argparse.ArgumentParser(description='Verify proof for an image circuit.')
 

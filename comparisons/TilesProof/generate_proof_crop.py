@@ -18,7 +18,7 @@ def tile_proof(tile_idx,pot_path):
     print('\n====================================')
     print(f'Generating proof for tile {tile_idx}')
 
-    for name,command in {'COMPILE':f'time -v ./scripts/compile_circuit.sh ./circuits/tiles/{circuit_name}.circom {input_path} ',
+    for name,command in {'COMPILE':f'time -v ./scripts/compile_circuit.sh ./circuits/tiles/{circuit_name}.circom {input_path} --nodejs',
                          'SETUP':f'time -v ./scripts/proving_system/setup_prover.sh {circuit_name} {pot_path}',
                          'PROVE':f'time -v ./scripts/proving_system/prover.sh {circuit_name} '}.items():
         start = time.time()
@@ -93,7 +93,7 @@ def generate_proof_crop(image_path, tiles_num, crop_height, crop_width, cropped_
     :param POT_PATH: path to the pot file
     """
     image_name = image_path.split('/')[-1].split('.')[0]
-    print(f'GENERATING PROOF FOR IMAGE {image_name} WITH {tiles_num} TILES')
+    print(f'GENERATING PROOF FOR IMAGE {image_name} WITH {tiles_num} TILES.\nTransformation: Crop')
 
     CIRCUIT_TEMPLATE = './circuits/base/crop_and_hash.circom'
     tiles = tile_image(image_path,tiles_num)
@@ -115,32 +115,6 @@ def generate_proof_crop(image_path, tiles_num, crop_height, crop_width, cropped_
 
 
 if __name__ == '__main__':
-    # resize here
-    # parser = argparse.ArgumentParser(description='Generate proof for an image circuit.')
-
-    # parser.add_argument('--image', type=str, required=True, help='Path to the image.')
-    # parser.add_argument('--N', type=int, required=True, help='Number of tiles to split the image into.')
-    # parser.add_argument('--height', type=int, required=True, help='Resize height.')
-    # parser.add_argument('--width', type=int, required=True, help='Resize width.')
-    # parser.add_argument('--pot', type=str, required=True, help='Path to the pot file.')
-
-    # args = parser.parse_args()
-
-    # generate_proof(args.image, args.N, args.height, args.width, args.pot)
-
-    #grayscale now
-    
-    # parser = argparse.ArgumentParser(description='Generate proof for an image circuit.')
-
-    # parser.add_argument('--image', type=str, required=True, help='Path to the image.')
-    # parser.add_argument('--N', type=int, required=True, help='Number of tiles to split the image into.')
-    # parser.add_argument('--pot', type=str, required=True, help='Path to the pot file.')
-
-    # args = parser.parse_args()
-
-    # generate_proof_grayscale(args.image, args.N, args.pot)
-
-    # crop now
 
     parser = argparse.ArgumentParser(description='Generate proof for an image circuit.')
 

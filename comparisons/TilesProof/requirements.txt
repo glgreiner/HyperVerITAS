@@ -1,3 +1,3 @@
-numpy>=1.26.2
+numpy==1.26.1
 opencv-python==4.8.1.78
 tensorflow-cpu==2.20.0
