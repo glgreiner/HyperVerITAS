@@ -8,7 +8,7 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 > [!NOTE]
 > If you have not already installed the necessary dependencies (Rust, Python, time), install them as described <a href=https://github.com/glgreiner/HyperVerITAS/blob/main/README.md#dependencies>here</a>.
 
-After you have installed the dependencies, we need to ensure we are using the correct version of Rust (latest works):
+After you have installed the dependencies, we need to ensure we are using the correct version of Rust (1.94.0-nightly works):
 
 - `rustup install nightly`
 
