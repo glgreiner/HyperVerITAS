@@ -16,7 +16,6 @@ mkdir -p output/snarkjs_circuit/${CIRCUIT_NAME} > /dev/null
 
 cd output/snarkjs_circuit/${CIRCUIT_NAME}
 
-
-snarkjs groth16 setup ${R1CS} ${POT} circuit_final.zkey
+node --max-old-space-size=16384 $(which snarkjs) groth16 setup ${R1CS} ${POT} circuit_final.zkey
 snarkjs zkey export verificationkey circuit_final.zkey verification_key.json
 
