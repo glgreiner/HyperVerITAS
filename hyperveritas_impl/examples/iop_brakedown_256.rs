@@ -29,7 +29,6 @@ use plonkish_backend::{
     util::{
         Itertools, 
         hash::Blake2s256,
-        new_fields::Mersenne127,
         code::{Brakedown, BrakedownSpec3, BrakedownSpec6},
         expression::{CommonPolynomial, Expression, Query, Rotation}, 
         arithmetic::{BatchInvert, BooleanHypercube, Field as myField}, 

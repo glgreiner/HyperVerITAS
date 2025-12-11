@@ -37,7 +37,7 @@ use plonkish_backend::{
     },
 };
 
-type Pcs = Basefold<F, Blake2s, Twenty>;
+type Pcs = Basefold<F, Blake2s, BasefoldFri>;
 
 const irredPolyTable: &[u32] = &[
     0, 0, 7, 11, 19, 37, 67, 131, 285, 529, 1033, 2053, 4179, 8219, 16707, 32771, 69643, 131081,

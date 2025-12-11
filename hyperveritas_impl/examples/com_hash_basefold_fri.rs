@@ -1,7 +1,7 @@
 #![allow(warnings)]
 
-mod iop_basefold;
-use iop_basefold::*;
+mod iop_basefold_fri;
+use iop_basefold_fri::*;
 
 use core::num;
 use proc_status::ProcStatus;
@@ -41,7 +41,7 @@ use plonkish_backend::{
 };
 
 
-type Pcs = Basefold<F, Blake2s, Twenty>;
+type Pcs = Basefold<F, Blake2s, BasefoldFri>;
 type VT = FiatShamirTranscript<Blake2s, std::io::Cursor<Vec<u8>>>;
 
 
@@ -79,7 +79,7 @@ fn run_hash_com_basefold(input_size: usize) {
     let imgComs = Pcs::batch_commit_and_write(&pp, &img_polys, &mut transcript);
     let elapsed_time = commit_start.elapsed();
 
-    println!("Basefold Commit Time is {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
+    println!("Basefold FRI Commit Time is {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
 
 }
 
@@ -94,7 +94,7 @@ fn main(){
 
     for i in first_size..last_size+1 {
         println!("-----------------------------------------------------------------------");
-        println!("PCS Hash, Basefold. Size: 2^{:?}\n", i);
+        println!("PCS Hash, Basefold FRI. Size: 2^{:?}\n", i);
         let _res = run_hash_com_basefold(i);
         println!("-----------------------------------------------------------------------");
     }

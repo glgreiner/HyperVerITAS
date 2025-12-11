@@ -29,7 +29,7 @@ use plonkish_backend::{
     util::{
         Itertools, 
         hash::Blake2s,
-        new_fields::Mersenne127 as F, goldilocksMont::GoldilocksMont,
+        new_fields::Mersenne127 as F,
         code::{Brakedown, BrakedownSpec3, BrakedownSpec6},
         expression::{CommonPolynomial, Expression, Query, Rotation}, 
         arithmetic::{BatchInvert, BooleanHypercube, Field as myField}, 

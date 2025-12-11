@@ -120,10 +120,10 @@ where
 
     let (rTAPoly, _) = vec_to_poly::<F>(rTA);
     let elapsed_time = now.elapsed();
-    println!(
-        "Prover time to do rTA is {:?} seconds \n",
-        elapsed_time.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Prover time to do rTA is {:?} seconds \n",
+    //     elapsed_time.as_millis() as f64 / 1000 as f64
+    // );
     //We run the sumcheck on rTA * I
     let now = Instant::now();
     let mut RHS_RGB = Vec::new();
@@ -141,10 +141,10 @@ where
         RHS_RGB[2].aux_info.clone()];
     
     let elapsed_time = now.elapsed();
-    println!(
-        "Prover time to do Sumcheck for hash preimage is {:?} seconds \n",
-        elapsed_time.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Prover time to do Sumcheck for hash preimage is {:?} seconds \n",
+    //     elapsed_time.as_millis() as f64 / 1000 as f64
+    // );
     let mut mySum = F::zero();
 
     //We run range check on image
@@ -169,17 +169,19 @@ where
         poly_infoProds.push(poly_infoProd);
     }
     let elapsed_time = now.elapsed();
-    println!(
-        "Prover time to do MultCheck for hash preimage is {:?} seconds \n",
-        elapsed_time.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Prover time to do MultCheck for hash preimage is {:?} seconds \n",
+    //     elapsed_time.as_millis() as f64 / 1000 as f64
+    // );
 
     //We return a vector containing the final points to evaluate I, the final points to evaulate h(from range check), the final points
     //to evaluate the prod and frac polynomials, as well as the sumcheck proof, range check proof.
     return (RHS_RGB, proofRGB, poly_infoRGB, multsetProofRGB, fxRGB, gxRGB, hRGB, poly_infoProds);
 }
 
-fn run_full_gray_kzg(testSize: usize) {
+fn run_full_gray_pst(testSize: usize) {
+    println!("\nstarting setup");
+
     let mut rng = test_rng();
     let numCols = testSize;
 
@@ -192,7 +194,7 @@ fn run_full_gray_kzg(testSize: usize) {
    
     // LOAD IMAGE----------------------------------------------------------------------------------------------------------
     let origImg = load_image(&fileName);
-    println!("this is dim {:?}", origImg.cols * origImg.rows);
+    // println!("this is dim {:?}", origImg.cols * origImg.rows);
     //Below we do padding, prover works with padded image, but later sends the unpadded commitment to verifier (this is fine as unpadded effectively has padding as 0)
     let mut RGBEvals = [toFieldVec(&origImg.R),toFieldVec(&origImg.G),toFieldVec(&origImg.B)];
 
@@ -221,6 +223,11 @@ fn run_full_gray_kzg(testSize: usize) {
         }
         testDigestRGB.push(testDigest);
     }
+
+    println!("setup done!\n");
+
+    println!("starting prover");
+
     //THIS IS PROVER DOING EVERYTHING
     let now0 = Instant::now();
     let origImg = load_image(&fileName);
@@ -236,7 +243,7 @@ fn run_full_gray_kzg(testSize: usize) {
     }
 
     let elapsed_time = now2.elapsed();
-    println!("KZG COMMIT TIME IS {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
+    // println!("PST COMMIT TIME IS {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
     let nowOpens = Instant::now();
 
 
@@ -266,10 +273,10 @@ fn run_full_gray_kzg(testSize: usize) {
             &ver_param,
         );
     let elapsed_time = now.elapsed();
-    println!(
-        "Prover time to do IOP is {:?} seconds",
-        elapsed_time.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Prover time to do IOP is {:?} seconds",
+    //     elapsed_time.as_millis() as f64 / 1000 as f64
+    // );
         //-----------------------------------------------------------------------------------GRAYSCALE--------------------------------------------------------------------------------------------
     let now: Instant = Instant::now();
 
@@ -336,10 +343,10 @@ fn run_full_gray_kzg(testSize: usize) {
     );
 
     let elapsed_time = now.elapsed();
-    println!(
-        "Prover time to do GRAYSCALE IOP is {:?} seconds",
-        elapsed_time.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Prover time to do GRAYSCALE IOP is {:?} seconds",
+    //     elapsed_time.as_millis() as f64 / 1000 as f64
+    // );
     
     // PUSH COMS FOR GRAYSCALE ERROR
     coms.push(grayErrCom);
@@ -679,9 +686,11 @@ fn run_full_gray_kzg(testSize: usize) {
     let openProofsBig = PCS::multi_open(&pcs_param,&evalPolsBig,&evalPointsBig,&evalValsBig,&mut transcript).unwrap();
 
     let elapsed_time = now0.elapsed();
-    println!("\nTime to do WHOLE PROVER TIME is {:?} seconds\n", elapsed_time.as_millis() as f64 / 1000 as f64);
+    // println!("\nTime to do WHOLE PROVER TIME is {:?} seconds\n", elapsed_time.as_millis() as f64 / 1000 as f64);
 
-    println!("\n------------------------------------------\nComputing Proof Sizes");
+    println!("PROVER TIME: {:?} seconds\n", elapsed_time.as_millis() as f64 / 1000 as f64);
+
+    // println!("\n------------------------------------------\nComputing Proof Sizes");
 
     let mut vec_multsetProofGray = Vec::new();
     vec_multsetProofGray.push(&multsetProofGray);
@@ -695,9 +704,9 @@ fn run_full_gray_kzg(testSize: usize) {
         &evalVals, &evalValsBig,
         &hComs);
 
-    println!("Total Bls12_381 elements: {:?}", elems_bls);
-    println!("Total 256 bit elements: {:?}", elems_256);
-    println!("Total Bls12_381 scalar field elements: {:?}", elems_scalar);
+    // println!("Total Bls12_381 elements: {:?}", elems_bls);
+    // println!("Total 256 bit elements: {:?}", elems_256);
+    // println!("Total Bls12_381 scalar field elements: {:?}", elems_scalar);
 
     let total_bls_bytes = elems_bls * 48;
     let total_256_bytes = elems_256 * 32;
@@ -705,9 +714,9 @@ fn run_full_gray_kzg(testSize: usize) {
 
     let total_bytes = total_bls_bytes + total_256_bytes + total_scalar_bytes;
 
-    println!("\n## TOTAL PROOF SIZE (Hash + Crop): {:?} Bytes", total_bytes);
-    
-    println!("\n\n");
+    // println!("\n## TOTAL PROOF SIZE (Hash + Crop): {:?} Bytes", total_bytes);
+
+    println!("PROOF SIZE: {:?} bytes", total_bytes);
 
 
     let mut verTranscript =
@@ -726,7 +735,8 @@ fn run_full_gray_kzg(testSize: usize) {
         hComs, grayErrCom, hGrayCom, &mut verTranscript);
 
     let elapsed_ver = ver_start.elapsed();
-    println!("Time to do WHOLE VERIFIER is {:?} seconds", elapsed_ver.as_millis() as f64 / 1000 as f64);
+    // println!("Time to do WHOLE VERIFIER is {:?} seconds", elapsed_ver.as_millis() as f64 / 1000 as f64);
+    println!("VERIFIER TIME: {:?} seconds", elapsed_ver.as_millis() as f64 / 1000 as f64);
 }
 
 fn ver<E, PCS>(
@@ -764,6 +774,7 @@ fn ver<E, PCS>(
         Evaluation = F,
         BatchProof = BatchProof<Bls12_381, MultilinearKzgPCS<Bls12_381>>
     >,          {
+    println!("\nstarting verifier");
     let now = Instant::now();
     let maxVal = 255;
     
@@ -802,7 +813,7 @@ fn ver<E, PCS>(
         rTA.push(mySum);
     }
     let elapsed_time = nowJank.elapsed();
-    println!("KZG: Time to compute rTA is {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
+    // println!("KZG: Time to compute rTA is {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
     // The verifier computes HASH * Frievald
     let mut expectedSumVal = [F::zero(),F::zero(),F::zero()];
     for i in 0..3{
@@ -817,7 +828,7 @@ fn ver<E, PCS>(
         sumCheckForHash.push(<PolyIOP<F> as SumCheck<F>>::verify(expectedSumVal[i], &proofRGB[i], &poly_infoRGB[i], transcript).unwrap());
     }
 
-    println!("Sumchecks for rA I == rh have passed!");
+    // println!("Sumchecks for rA I == rh have passed!");
     // Now do sumcheck for range check!
     // These are utilized internally in range check. We'll need them later for when we do point equality checks
     let mut alpha1 = Vec::new(); 
@@ -829,7 +840,7 @@ fn ver<E, PCS>(
         alpha2.push(transcript.get_and_append_challenge(b"alpha").unwrap());
         prodCheckSubclaims.push(<PolyIOP<E::ScalarField> as ProductCheck<E, PCS>>::verify(&multsetProof[i],&poly_infoProds[i], transcript).unwrap());
     }
-    println!("Sumchecks for rangechecks have passed!");
+    // println!("Sumchecks for rangechecks have passed!");
     // Now do sumcheck for image transformation
     // First get frievald challenge
 
@@ -1371,7 +1382,7 @@ fn main(){
     for i in first_size..last_size+1 {
         println!("-----------------------------------------------------------------------");
         println!("Full System Grayscale, HyperVerITAS PST. Size: 2^{:?}\n", i);
-        let _res = run_full_gray_kzg(i);
+        let _res = run_full_gray_pst(i);
         println!("-----------------------------------------------------------------------");
     }
 }

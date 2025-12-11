@@ -101,4 +101,4 @@ def generateImages(start, end):
     print("All Images Generated!")
 
 
-generateImages(19, 20)
+generateImages(19, 25)

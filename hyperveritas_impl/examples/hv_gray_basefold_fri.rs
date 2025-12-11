@@ -1,7 +1,7 @@
 #![allow(warnings)]
 
-mod iop_basefold;
-use iop_basefold::*;
+mod iop_basefold_fri;
+use iop_basefold_fri::*;
 
 use core::num;
 use proc_status::ProcStatus;
@@ -41,7 +41,7 @@ use plonkish_backend::{
 };
 
 
-type Pcs = Basefold<F, Blake2s, Twenty>;
+type Pcs = Basefold<F, Blake2s, BasefoldFri>;
 type VT = FiatShamirTranscript<Blake2s, std::io::Cursor<Vec<u8>>>;
 
 
@@ -826,7 +826,7 @@ fn main(){
 
     for i in first_size..last_size+1 {
         println!("-----------------------------------------------------------------------");
-        println!("Full System Grayscale, HyperVerITAS Basefold. Size: 2^{:?}\n", i);
+        println!("Full System Grayscale, HyperVerITAS Basefold FRI. Size: 2^{:?}\n", i);
         let _res = run_full_gray_basefold(i);
         println!("-----------------------------------------------------------------------");
     }

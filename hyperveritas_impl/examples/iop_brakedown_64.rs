@@ -16,8 +16,7 @@ use hyperveritas_impl::types::*;
 use plonkish_backend::{
     pcs::{
         Evaluation, PolynomialCommitmentScheme,
-        univariate::{Fri, FriProverParams, FriVerifierParams},
-        multilinear::{Basefold, BasefoldCommitment, BasefoldParams, BasefoldProverParams, BasefoldVerifierParams, BasefoldExtParams},
+        multilinear::{MultilinearBrakedown, MultilinearBrakedownCommitment},
     },
     poly::{
         Polynomial,
@@ -30,14 +29,15 @@ use plonkish_backend::{
     util::{
         Itertools, 
         hash::Blake2s,
-        new_fields::Mersenne127 as F,
+        goldilocksMont::GoldilocksMont as F,
+        code::{Brakedown, BrakedownSpec3, BrakedownSpec6},
         expression::{CommonPolynomial, Expression, Query, Rotation}, 
         arithmetic::{BatchInvert, BooleanHypercube, Field as myField}, 
         transcript::{FieldTranscriptWrite, InMemoryTranscript, TranscriptWrite},
     },
 };
 
-type Pcs = Basefold<F, Blake2s, Twenty>;
+type Pcs = MultilinearBrakedown<F, Blake2s, BrakedownSpec6>;
 
 const irredPolyTable: &[u32] = &[
     0, 0, 7, 11, 19, 37, 67, 131, 285, 529, 1033, 2053, 4179, 8219, 16707, 32771, 69643, 131081,
@@ -170,7 +170,7 @@ fn create_prod_poly<F: myField> (frac_poly: &MultilinearPolynomial<F>) -> Multil
 
 
 fn product_check(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, fxs: MultilinearPolynomial<F>, gxs: MultilinearPolynomial<F>, 
-    transcript: &mut impl TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>, start: usize) -> (Expression<F>, Vec<MultilinearPolynomial<F>>, Vec<F>, Vec<F>, Vec<BasefoldCommitment<F, Blake2s>>) 
+    transcript: &mut impl TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>, start: usize) -> (Expression<F>, Vec<MultilinearPolynomial<F>>, Vec<F>, Vec<F>, Vec<MultilinearBrakedownCommitment<F, Blake2s>>) 
 {
     let mut rng = test_rng();
 
@@ -234,7 +234,7 @@ pub fn multsetCreatePolys(
     p2: &[MultilinearPolynomial<F>],
     transcript: &mut impl TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>,
     start: usize
-) -> (Expression<F>, Vec<MultilinearPolynomial<F>>, Vec<F>, Vec<F>, Vec<BasefoldCommitment<F, Blake2s>>)
+) -> (Expression<F>, Vec<MultilinearPolynomial<F>>, Vec<F>, Vec<F>, Vec<MultilinearBrakedownCommitment<F, Blake2s>>)
 {
     let alpha = transcript.squeeze_challenge();
 
@@ -324,7 +324,7 @@ pub fn range_checkProverIOP(
     primPolyForH: u64,
     transcript: &mut impl TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>,
     start: usize
-) -> (Expression<F>, Vec<MultilinearPolynomial<F>>, Vec<F>, Vec<F>, Vec<BasefoldCommitment<F, Blake2s>>)
+) -> (Expression<F>, Vec<MultilinearPolynomial<F>>, Vec<F>, Vec<F>, Vec<MultilinearBrakedownCommitment<F, Blake2s>>)
 {
     //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
     let mut embeddedTable: Vec<F> = vec![F::ZERO; 1 << nv];

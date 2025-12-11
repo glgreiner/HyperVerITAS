@@ -29,7 +29,7 @@ use plonkish_backend::{
     util::{
         Itertools, 
         hash::Blake2s,
-        new_fields::Mersenne127, goldilocksMont::GoldilocksMont as F,
+        new_fields::Mersenne127 as F,
         code::{Brakedown, BrakedownSpec3, BrakedownSpec6},
         expression::{CommonPolynomial, Expression, Query, Rotation}, 
         arithmetic::{BatchInvert, BooleanHypercube, Field as myField}, 
@@ -76,7 +76,7 @@ fn run_hash_com_brakedown(input_size: usize) {
     let imgComs = Pcs::batch_commit_and_write(&pp, &img_polys, &mut transcript);
     let elapsed_time = commit_start.elapsed();
 
-    println!("Brakedown Commit Time is {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
+    println!("Brakedown 127 Commit Time is {:?} seconds", elapsed_time.as_millis() as f64 / 1000 as f64);
 
 }
 
@@ -91,7 +91,7 @@ fn main(){
 
     for i in first_size..last_size+1 {
         println!("-----------------------------------------------------------------------");
-        println!("PCS Hash, Brakedown. Size: 2^{:?}\n", i);
+        println!("PCS Hash, Brakedown 127. Size: 2^{:?}\n", i);
         let _res = run_hash_com_brakedown(i);
         println!("-----------------------------------------------------------------------");
     }

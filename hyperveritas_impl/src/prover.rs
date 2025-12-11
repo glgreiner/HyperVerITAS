@@ -341,10 +341,10 @@ pub fn cropProveAffineIOP<F: PrimeField>(
     let permTimesR = matSparseMultVec::<F>(1 << nvOrig, 1 << nvCrop, &cropPerm, &frievaldRandVec);
     
     let elapsed_timeProver = now.elapsed();
-    println!(
-        "Verifier/Prover time in PermTimesR is {} seconds.",
-        elapsed_timeProver.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Verifier/Prover time in PermTimesR is {} seconds.",
+    //     elapsed_timeProver.as_millis() as f64 / 1000 as f64
+    // );
 
     let now = Instant::now();
 
@@ -353,10 +353,10 @@ pub fn cropProveAffineIOP<F: PrimeField>(
         permTimesR,
     ));
     let elapsed_timeProver = now.elapsed();
-    println!(
-        "Time to turn perm times R into poly {} seconds.",
-        elapsed_timeProver.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Time to turn perm times R into poly {} seconds.",
+    //     elapsed_timeProver.as_millis() as f64 / 1000 as f64
+    // );
 
     let mut IPermR = VirtualPolynomial::new_from_mle(&permTimesRPoly, F::one());
     let mut IPermG = VirtualPolynomial::new_from_mle(&permTimesRPoly, F::one());
@@ -374,10 +374,10 @@ pub fn cropProveAffineIOP<F: PrimeField>(
     let proof2 = <PolyIOP<F> as SumCheck<F>>::prove(&IPermB, transcript).unwrap();
 
     let elapsed_timeProver = now.elapsed();
-    println!(
-        "Time to run sumcheck IOP is {} seconds.",
-        elapsed_timeProver.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Time to run sumcheck IOP is {} seconds.",
+    //     elapsed_timeProver.as_millis() as f64 / 1000 as f64
+    // );
     return ([proof0, proof1, proof2], IPermR.aux_info);
 }
 
@@ -424,10 +424,10 @@ pub fn cropProveOneAffineIOP<F: PrimeField>(
     let now = Instant::now();
     let permTimesR = matSparseMultVec::<F>(1 << nvOrig, 1 << nvCrop, &cropPerm, &frievaldRandVec);
     let elapsed_timeProver = now.elapsed();
-    println!(
-        "Verifier/Prover time in PermTimesR is {} seconds.",
-        elapsed_timeProver.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Verifier/Prover time in PermTimesR is {} seconds.",
+    //     elapsed_timeProver.as_millis() as f64 / 1000 as f64
+    // );
 
     let now = Instant::now();
 
@@ -436,10 +436,10 @@ pub fn cropProveOneAffineIOP<F: PrimeField>(
         permTimesR,
     ));
     let elapsed_timeProver = now.elapsed();
-    println!(
-        "Time to turn perm times R into poly {} seconds.",
-        elapsed_timeProver.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Time to turn perm times R into poly {} seconds.",
+    //     elapsed_timeProver.as_millis() as f64 / 1000 as f64
+    // );
 
     let mut IPermR = VirtualPolynomial::new_from_mle(&permTimesRPoly, F::one());
 
@@ -451,10 +451,10 @@ pub fn cropProveOneAffineIOP<F: PrimeField>(
     let proof0 = <PolyIOP<F> as SumCheck<F>>::prove(&IPermR, transcript).unwrap();
 
     let elapsed_timeProver = now.elapsed();
-    println!(
-        "Time to run sumcheck IOP is {} seconds.",
-        elapsed_timeProver.as_millis() as f64 / 1000 as f64
-    );
+    // println!(
+    //     "Time to run sumcheck IOP is {} seconds.",
+    //     elapsed_timeProver.as_millis() as f64 / 1000 as f64
+    // );
     return proof0;
 }
 

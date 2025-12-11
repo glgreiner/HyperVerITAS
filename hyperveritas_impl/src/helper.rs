@@ -114,11 +114,11 @@ pub fn matrix_poly<F: PrimeField>(
         F_M.push(evalPt);
         sum += evalPt;
     }
-    println!("evaluations took {} seconds.", profileEvals / 1000);
-    println!(
-        "creating eval pts took {} seconds.",
-        profileCreatePts / 1000
-    );
+    // println!("evaluations took {} seconds.", profileEvals / 1000);
+    // println!(
+    //     "creating eval pts took {} seconds.",
+    //     profileCreatePts / 1000
+    // );
 
     return (
         Arc::new(DenseMultilinearExtension::from_evaluations_vec(nv, F_M)),

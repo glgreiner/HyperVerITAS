@@ -1,7 +1,7 @@
 #![allow(warnings)]
 
-mod iop_basefold;
-use iop_basefold::*;
+mod iop_brakedown_64;
+use iop_brakedown_64::*;
 
 use core::num;
 use proc_status::ProcStatus;
@@ -10,7 +10,7 @@ use transcript::IOPTranscript;
 use std::{marker::PhantomData, sync::Arc, ops::{Range, Deref}, primitive, str::FromStr, time::Instant, env, array, iter};
 
 use ark_ec::pairing::prepare_g1;
-use ark_std::{rand::{RngCore as R, rngs::{OsRng, StdRng}, CryptoRng, RngCore, SeedableRng}, test_rng};
+use ark_std::{rand::{RngCore as R, rngs::{OsRng, StdRng}, CryptoRng, RngCore, SeedableRng}, test_rng, };
 
 use rand_chacha::ChaCha8Rng;
 
@@ -19,8 +19,7 @@ use hyperveritas_impl::{types::*, helper::*, image::*};
 use plonkish_backend::{
     pcs::{
         Evaluation, PolynomialCommitmentScheme,
-        univariate::{Fri, FriProverParams, FriVerifierParams},
-        multilinear::{Basefold, BasefoldCommitment, BasefoldParams, BasefoldProverParams, BasefoldVerifierParams, BasefoldExtParams, Type1Polynomial, Type2Polynomial},
+        multilinear::{MultilinearBrakedown, MultilinearBrakedownCommitment, additive::{batch_open_one, batch_verify_one},},
     },
     poly::{
         Polynomial,
@@ -33,7 +32,8 @@ use plonkish_backend::{
     util::{
         Itertools, 
         hash::Blake2s,
-        new_fields::Mersenne127 as F,
+        goldilocksMont::GoldilocksMont as F,
+        code::{Brakedown, BrakedownSpec3, BrakedownSpec6},
         expression::{CommonPolynomial, Expression, Query, Rotation}, 
         arithmetic::{BatchInvert, BooleanHypercube, Field as myField}, 
         transcript::{Blake2sTranscript, FiatShamirTranscript, FieldTranscript, FieldTranscriptRead, FieldTranscriptWrite, InMemoryTranscript, TranscriptWrite},
@@ -41,7 +41,7 @@ use plonkish_backend::{
 };
 
 
-type Pcs = Basefold<F, Blake2s, Twenty>;
+type Pcs = MultilinearBrakedown<F, Blake2s, BrakedownSpec6>;
 type VT = FiatShamirTranscript<Blake2s, std::io::Cursor<Vec<u8>>>;
 
 
@@ -77,7 +77,7 @@ pub fn matSparseMultVec(
     return Ar;
 }
 
-fn makePtsFullCrop(numCols: usize, vals: Vec<Vec<F>>) -> Vec<Vec<F>>{
+fn makePtsFullCrop(numCols: usize, vals: Vec<Vec<F>>)-> Vec<Vec<F>>{
     let mut points = Vec::new();
 
     let mut origPt: Vec<F> = vals[0].clone();
@@ -132,19 +132,19 @@ fn makePtsFullCrop(numCols: usize, vals: Vec<Vec<F>>) -> Vec<Vec<F>>{
 }
 
 fn hashPreimageProve(
-    pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam,
+    pp: <MultilinearBrakedown<F, Blake2s, BrakedownSpec6> as PolynomialCommitmentScheme<F>>::ProverParam,
     numCols: usize,
     numRows: usize,
     RGBEvals: [Vec<F>;3],
     RBGEvalsInt: [Vec<usize>;3],
-    transcript: &mut (impl TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F> + InMemoryTranscript),
+    transcript: &mut (impl TranscriptWrite<<MultilinearBrakedown<F, Blake2s, BrakedownSpec6> as PolynomialCommitmentScheme<F>>::CommitmentChunk, F> + InMemoryTranscript),
 ) -> (
-    Vec<BasefoldCommitment<F, Blake2s>>,
+    Vec<MultilinearBrakedownCommitment<F, Blake2s>>,
     Vec<F>,
     Vec<Vec<F>>,
     Vec<MultilinearPolynomial<F>>,
     [Vec<F>;1],
-    Vec<BasefoldCommitment<F, Blake2s>>,
+    Vec<MultilinearBrakedownCommitment<F, Blake2s>>,
     Vec<MultilinearPolynomial<F>>,
     Vec<Vec<F>>,
 ){
@@ -266,7 +266,7 @@ fn hashPreimageProve(
 }
 
 pub fn affineCropProve(
-    pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam,
+    pp: <MultilinearBrakedown<F, Blake2s, BrakedownSpec6> as PolynomialCommitmentScheme<F>>::ProverParam,
     nvOrig: usize,
     nvCrop: usize,
     origImgR: MultilinearPolynomial<F>,
@@ -281,7 +281,7 @@ pub fn affineCropProve(
     startY: usize,
     endX: usize,
     endY: usize,
-    transcript: &mut (impl TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F> + InMemoryTranscript),
+    transcript: &mut (impl TranscriptWrite<<MultilinearBrakedown<F, Blake2s, BrakedownSpec6> as PolynomialCommitmentScheme<F>>::CommitmentChunk, F> + InMemoryTranscript),
 ) -> (Vec<MultilinearPolynomial<F>>, [Vec<F>; 1], (Vec<F>, Vec<F>), F)
 {
     let mut rng = test_rng();
@@ -391,8 +391,13 @@ fn setup(input_size: usize) -> (<Pcs as PolynomialCommitmentScheme<F>>::ProverPa
     return (pp, vp, digestRGB)
 }
 
-fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: usize, numRows: usize, numCols: usize, nvCrop: usize) -> (usize, usize, usize, usize, usize, usize, Vec<Evaluation<F>>, (impl (TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>) + InMemoryTranscript)) {
+fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: usize, numRows: usize, numCols: usize, nvCrop: usize) 
+ -> (usize, usize, usize, usize, usize, usize, 
+     Vec<Vec<Evaluation<F>>>, Vec<Vec<Evaluation<F>>>, Vec<Vec<Evaluation<F>>>, Vec<Vec<Evaluation<F>>>, 
+     (impl (TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>) + InMemoryTranscript)) 
+{
     println!("starting prover");
+    let length = input_size+1;
     
     // create a new transcript
     let mut transcript = Blake2sTranscript::new(());
@@ -410,6 +415,7 @@ fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: us
     let mut g_chan: Vec<usize> = origImg.G.iter().map(|x| (*x).into()).collect();
     let mut b_chan: Vec<usize> = origImg.B.iter().map(|x| (*x).into()).collect();
 
+
     // do the hash pre image proof
     let (imgComs, mmChall, rangeChalls, imgPolies,imgYs, com_outs, poly_outs, ys_outs) =
         hashPreimageProve(
@@ -421,7 +427,6 @@ fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: us
             &mut transcript,
         );
     
-
     let mut Polies = Vec::new();
 
     let mut allPads = Vec::new();
@@ -450,7 +455,6 @@ fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: us
         PolyComs.push(com_outs[3*i+1].clone());
     }
 
-
     let cropFileName = format!("images/Crop{}.json", input_size);
 
     let cropImg = load_image(cropFileName);
@@ -463,9 +467,8 @@ fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: us
     let cropImgPolyG  = MultilinearPolynomial::new(fieldVec::<F>(&cropImg.G.iter().map(|&x| x as u64).collect::<Vec<_>>()));
     let cropImgPolyB  = MultilinearPolynomial::new(fieldVec::<F>(&cropImg.B.iter().map(|&x| x as u64).collect::<Vec<_>>()));
     let (cropStartX,cropStartY) = (0,0);
-    let (cropEndX, cropEndY) = (cropImg.rows, cropImg.cols);
+    let (cropEndX, cropEndY) = (cropImg.rows,cropImg.cols);
 
-    // origImg.cols * origImg.rows
     let (origWidth, origHeight, startX, startY, endX, endY) = (origImg.rows, origImg.cols, cropStartX,cropStartY, cropEndX, cropEndY);
     let (crop_polys, ys_crop, proof_crop, crop_sum) = affineCropProve(pp.clone(),
     numCols,
@@ -483,7 +486,7 @@ fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: us
     endX,
     endY, 
     &mut transcript);
-    
+
     let mut polynomials = Polies;
     let mut coms = PolyComs;
     let mut my_alphas = Vec::new();
@@ -493,198 +496,259 @@ fn prove(pp: <Pcs as PolynomialCommitmentScheme<F>>::ProverParam, input_size: us
     my_alphas.push(rangeChalls[2].clone());
     my_alphas.push(proof_crop.0.clone());
     let points = makePtsFullCrop(numCols, my_alphas.clone());
-
-    let mut evals = Vec::new();
     
-    let mut point_idxs = Vec::new();
-    point_idxs.push(1);
-    point_idxs.push(3);
-    point_idxs.push(4);
-    point_idxs.push(5);
-    point_idxs.push(2);
-    point_idxs.push(6);
-    point_idxs.push(6);
-    point_idxs.push(7);
-    point_idxs.push(7);
-    point_idxs.push(8);
-    point_idxs.push(8);
-    point_idxs.push(0); // 11
-    point_idxs.push(points.len()-3); // 12 
-    point_idxs.push(21); // 13
+    let mut hcoms_vec = Vec::new();
+    let mut hpolys_vec = Vec::new();
+    let mut hpoints_vec = Vec::new();
+    let mut hevals_vec = Vec::new();
 
-    point_idxs.push(1);
-    point_idxs.push(9);
-    point_idxs.push(10);
-    point_idxs.push(11);
-    point_idxs.push(2);
-    point_idxs.push(12);
-    point_idxs.push(12);
-    point_idxs.push(13);
-    point_idxs.push(13);
-    point_idxs.push(14);
-    point_idxs.push(14);
-    point_idxs.push(0); // 25
-    point_idxs.push(points.len()-2); // 26
-    point_idxs.push(21); // 27
+    let mut fraccoms_vec = Vec::new();
+    let mut fracpolys_vec = Vec::new();
+    let mut fracpoints_vec = Vec::new();
+    let mut fracevals_vec = Vec::new();
 
-    point_idxs.push(1);
-    point_idxs.push(15);
-    point_idxs.push(16);
-    point_idxs.push(17);
-    point_idxs.push(2);
-    point_idxs.push(18);
-    point_idxs.push(18);
-    point_idxs.push(19);
-    point_idxs.push(19);
-    point_idxs.push(20);
-    point_idxs.push(20);
-    point_idxs.push(0); // 39
-    point_idxs.push(points.len()-1); // 40
-    point_idxs.push(21); // 41
-    
+    let mut prodcoms_vec = Vec::new();
+    let mut prodpolys_vec = Vec::new();
+    let mut prodpoints_vec = Vec::new();
+    let mut prodevals_vec = Vec::new();
 
-    let mut counter = 0;
+    let mut imgcoms_vec = Vec::new();
+    let mut imgpolys_vec = Vec::new();
+    let mut imgpoints_vec = Vec::new();
+    let mut imgevals_vec = Vec::new();
+
+    // ----------------------------------------------END OF MAKING EVAL POINTS----------------------------------------------
     for i in 0..3{
+        let imgChnlInd = i;
         let prodInd = 5+i*3;
         let fracInd = 4+i*3;
-        let hInd = 3+i*3;      
-        //----------------------------------------------We now add 0 for h----------------------------------------------
-        evals.push(Evaluation::new(
-            hInd,
-            point_idxs[counter],
+        let hInd = 3+i*3;
+    
+        // MAKE H
+        let mut hcom_0 = Vec::new();
+        hcom_0.push(&coms[hInd]);
+        hcom_0.push(&coms[hInd]);
+        hcom_0.push(&coms[hInd]);
+        hcom_0.push(&coms[hInd]);
+
+        let mut hpoly_0 = Vec::new();
+        hpoly_0.push(&polynomials[hInd]);
+        hpoly_0.push(&polynomials[hInd]);
+        hpoly_0.push(&polynomials[hInd]);
+        hpoly_0.push(&polynomials[hInd]);
+
+        let mut hpoints_0 = Vec::new();
+        hpoints_0.push(points[1].clone());
+        hpoints_0.push(points[3+i*6].clone());
+        hpoints_0.push(points[4+i*6].clone());
+        hpoints_0.push(points[5+i*6].clone());
+
+        let mut hevals_0 = Vec::new();
+        hevals_0.push(Evaluation::new(
+            0,
+            0,
             F::ZERO,
         ));
-        counter+=1;
-
-        // // //----------------------------------------------We now add alpha_range for h----------------------------------------------
-        evals.push(Evaluation::new(
-            hInd,
-            point_idxs[counter],
-            polynomials[hInd].evaluate(&points[point_idxs[counter]]),
+        hevals_0.push(Evaluation::new(
+            1,
+            1,
+            hpoly_0[1].evaluate(&hpoints_0[1]),
         ));
-        counter+=1;
-    
-        // // //----------------------------------------------We now add alpha_range modified0 for h----------------------------------------------
-
-        evals.push(Evaluation::new(
-            hInd,
-            point_idxs[counter],
-            polynomials[hInd].evaluate(&points[point_idxs[counter]]),
+        hevals_0.push(Evaluation::new(
+            2,
+            2,
+            hpoly_0[2].evaluate(&hpoints_0[2]),
         ));
-        counter+=1;
-
-        // // //----------------------------------------------We now add alpha_range modified1 for h----------------------------------------------
-        evals.push(Evaluation::new(
-            hInd,
-            point_idxs[counter],
-            polynomials[hInd].evaluate(&points[point_idxs[counter]]),
+        hevals_0.push(Evaluation::new(
+            3,
+            3,
+            hpoly_0[3].evaluate(&hpoints_0[3]),
         ));
-        counter+=1;
 
-        // // //----------------------------------------------We then add prod for 1...10----------------------------------------------
-        evals.push(Evaluation::new(
-            prodInd,
-            point_idxs[counter],
+        hcoms_vec.push(hcom_0);
+        hpolys_vec.push(hpoly_0);
+        hpoints_vec.push(hpoints_0);
+        hevals_vec.push(hevals_0);
+
+        // make FRAC
+        let mut fraccom_0 = Vec::new();
+        fraccom_0.push(&coms[fracInd]);
+        fraccom_0.push(&coms[fracInd]);
+        fraccom_0.push(&coms[fracInd]);
+
+        let mut fracpoly_0 = Vec::new();
+        fracpoly_0.push(&polynomials[fracInd]);
+        fracpoly_0.push(&polynomials[fracInd]);
+        fracpoly_0.push(&polynomials[fracInd]);
+
+        let mut fracpoints_0 = Vec::new();
+        fracpoints_0.push(points[6+i*6].clone());
+        fracpoints_0.push(points[7+i*6].clone());
+        fracpoints_0.push(points[8+i*6].clone());
+
+        let mut fracevals_0 = Vec::new();
+        fracevals_0.push(Evaluation::new(
+            0,
+            0,
+            fracpoly_0[0].evaluate(&fracpoints_0[0]),
+        ));
+        fracevals_0.push(Evaluation::new(
+            1,
+            1,
+            fracpoly_0[1].evaluate(&fracpoints_0[1]),
+        ));
+        fracevals_0.push(Evaluation::new(
+            2,
+            2,
+            fracpoly_0[2].evaluate(&fracpoints_0[2]),
+        ));
+
+        fraccoms_vec.push(fraccom_0);
+        fracpolys_vec.push(fracpoly_0);
+        fracpoints_vec.push(fracpoints_0);
+        fracevals_vec.push(fracevals_0);
+
+        
+        // make PROD
+        let mut prodcom_0 = Vec::new();
+        prodcom_0.push(&coms[prodInd]);
+        prodcom_0.push(&coms[prodInd]);
+        prodcom_0.push(&coms[prodInd]);
+        prodcom_0.push(&coms[prodInd]);
+
+        let mut prodpoly_0 = Vec::new();
+        prodpoly_0.push(&polynomials[prodInd]);
+        prodpoly_0.push(&polynomials[prodInd]);
+        prodpoly_0.push(&polynomials[prodInd]);
+        prodpoly_0.push(&polynomials[prodInd]);
+
+        let mut prodpoints_0 = Vec::new();
+        prodpoints_0.push(points[2].clone());
+        prodpoints_0.push(points[6+i*6].clone());
+        prodpoints_0.push(points[7+i*6].clone());
+        prodpoints_0.push(points[8+i*6].clone());
+
+        let mut prodevals_0 = Vec::new();
+        prodevals_0.push(Evaluation::new(
+            0,
+            0,
             F::ONE,
         ));
-        counter+=1;
-
-        // // //----------------------------------------------We now add alpha_range for prod----------------------------------------------
-        evals.push(Evaluation::new(
-            prodInd,
-            point_idxs[counter],
-            polynomials[prodInd].evaluate(&points[point_idxs[counter]]),
+        prodevals_0.push(Evaluation::new(
+            1,
+            1,
+            prodpoly_0[1].evaluate(&prodpoints_0[1]),
         ));
-        counter+=1;
-
-
-        // // //----------------------------------------------We now add alpha_range for frac----------------------------------------------
-
-        evals.push(Evaluation::new(
-            fracInd,
-            point_idxs[counter],
-            polynomials[fracInd].evaluate(&points[point_idxs[counter]]),
+        prodevals_0.push(Evaluation::new(
+            2,
+            2,
+            prodpoly_0[2].evaluate(&prodpoints_0[2]),
         ));
-        counter+=1;
-
-        // //----------------------------------------------we now add alpha_range||0 for prod----------------------------------------------
-
-        evals.push(Evaluation::new(
-            prodInd,
-            point_idxs[counter],
-            polynomials[prodInd].evaluate(&points[point_idxs[counter]]),
+        prodevals_0.push(Evaluation::new(
+            3,
+            3,
+            prodpoly_0[3].evaluate(&prodpoints_0[3]),
         ));
-        counter+=1;
 
-        // // // // //----------------------------------------------we now add alpha_range||0 for frac----------------------------------------------
-        evals.push(Evaluation::new(
-            fracInd,
-            point_idxs[counter],
-            polynomials[fracInd].evaluate(&points[point_idxs[counter]]),
-        ));
-        counter+=1;
+        prodcoms_vec.push(prodcom_0);
+        prodpolys_vec.push(prodpoly_0);
+        prodpoints_vec.push(prodpoints_0);
+        prodevals_vec.push(prodevals_0);
 
-        // // // //----------------------------------------------we now add alpha_range||1 for prod----------------------------------------------
-        evals.push(Evaluation::new(
-            prodInd,
-            point_idxs[counter],
-            polynomials[prodInd].evaluate(&points[point_idxs[counter]]),
-        ));
-        counter+=1;
 
-        // // // //----------------------------------------------we now add alpha_range||1 for frac----------------------------------------------
-        evals.push(Evaluation::new(
-            fracInd,
-            point_idxs[counter],
-            polynomials[fracInd].evaluate(&points[point_idxs[counter]]),
-        ));
-        counter+=1;
+        // make IMG
+        let mut imgcom_0 = Vec::new();
+        imgcom_0.push(&coms[imgChnlInd]);
+        imgcom_0.push(&coms[imgChnlInd]);
+        imgcom_0.push(&coms[imgChnlInd]);
 
-        evals.push(Evaluation::new(
-            i,
-            point_idxs[counter],
-            polynomials[i].evaluate(&points[point_idxs[counter]]),
-        ));
-        counter +=1;
-            
-        // //----------------------------------------------We now add alpha_range for image----------------------------------------------
+        let mut imgpoly_0 = Vec::new();
+        imgpoly_0.push(&polynomials[imgChnlInd]);
+        imgpoly_0.push(&polynomials[imgChnlInd]);
+        imgpoly_0.push(&polynomials[imgChnlInd]);
 
-        evals.push(Evaluation::new(
-            i,
-            point_idxs[counter],
-            polynomials[i].evaluate(&points[point_idxs[counter]]),
-        ));
-        counter+=1;
+        let mut imgpoints_0 = Vec::new();
+        imgpoints_0.push(points[0].clone());
+        imgpoints_0.push(points[points.len()-3+i].clone());
+        imgpoints_0.push(points[21].clone());
 
-        // // // //----------------------------------------------we now add transPoint for IMG ----------------------------------------------
-        evals.push(Evaluation::new(
-            i,
-            point_idxs[counter],
-            polynomials[i].evaluate(&points[point_idxs[counter]]),
+        let mut imgevals_0 = Vec::new();
+        imgevals_0.push(Evaluation::new(
+            0,
+            0,
+            imgpoly_0[0].evaluate(&imgpoints_0[0]),
         ));
-        counter+=1;
-    
+        imgevals_0.push(Evaluation::new(
+            1,
+            1,
+            imgpoly_0[1].evaluate(&imgpoints_0[1]),
+        ));
+        imgevals_0.push(Evaluation::new(
+            2,
+            2,
+            imgpoly_0[2].evaluate(&imgpoints_0[2]),
+        ));
+
+        imgcoms_vec.push(imgcom_0);
+        imgpolys_vec.push(imgpoly_0);
+        imgpoints_vec.push(imgpoints_0);
+        imgevals_vec.push(imgevals_0);
+
     }
 
-    // write evals to transcript
-    transcript.write_field_elements(evals.iter().map(Evaluation::value)).unwrap();
+    for i in 0..3{
 
-    // batch open the points
-    Pcs::batch_open(
-        &pp,
-        &polynomials,
-        &coms,
-        &points,
-        &evals,
-        &mut transcript,
-    ).unwrap();
+        transcript.write_field_elements(hevals_vec[i].iter().map(Evaluation::value)).unwrap();
+        batch_open_one::<F, Pcs>(
+            &pp,
+            length,
+            hpolys_vec[i].clone(),
+            hcoms_vec[i].clone(),
+            &hpoints_vec[i],
+            &hevals_vec[i],
+            &mut transcript,
+        ).unwrap();
 
+        transcript.write_field_elements(fracevals_vec[i].iter().map(Evaluation::value)).unwrap();
+        batch_open_one::<F, Pcs>(
+            &pp,
+            length,
+            fracpolys_vec[i].clone(),
+            fraccoms_vec[i].clone(),
+            &fracpoints_vec[i],
+            &fracevals_vec[i],
+            &mut transcript,
+        ).unwrap();
+
+        transcript.write_field_elements(prodevals_vec[i].iter().map(Evaluation::value)).unwrap();
+        batch_open_one::<F, Pcs>(
+            &pp,
+            length,
+            prodpolys_vec[i].clone(),
+            prodcoms_vec[i].clone(),
+            &prodpoints_vec[i],
+            &prodevals_vec[i],
+            &mut transcript,
+        ).unwrap();
+
+        transcript.write_field_elements(imgevals_vec[i].iter().map(Evaluation::value)).unwrap();
+        batch_open_one::<F, Pcs>(
+            &pp,
+            length,
+            imgpolys_vec[i].clone(),
+            imgcoms_vec[i].clone(),
+            &imgpoints_vec[i],
+            &imgevals_vec[i],
+            &mut transcript,
+        ).unwrap();
+    }
     println!("prover done!");
-    return (origWidth, origHeight, startX, startY, endX, endY, evals, transcript)
+
+    return (origWidth, origHeight, startX, startY, endX, endY, hevals_vec, fracevals_vec, prodevals_vec, imgevals_vec, transcript);
 }
 
 fn verify(
-    vp: <Pcs as PolynomialCommitmentScheme<F>>::VerifierParam, 
+    vp: <MultilinearBrakedown<F, Blake2s, BrakedownSpec6> as PolynomialCommitmentScheme<F>>::VerifierParam, 
     numRows: usize,
     numCols: usize,
     nvCrop: usize,
@@ -694,30 +758,29 @@ fn verify(
     startY: usize,
     endX: usize,
     endY: usize,
-    evals: Vec<Evaluation<F>>,
+    hevals_vec: Vec<Vec<Evaluation<F>>>,
+    fracevals_vec: Vec<Vec<Evaluation<F>>>,
+    prodevals_vec: Vec<Vec<Evaluation<F>>>,
+    imgevals_vec: Vec<Vec<Evaluation<F>>>,
     cameraHash:Vec<Vec<F>>,
-    transcript:  (impl (TranscriptWrite<<Pcs as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>) + InMemoryTranscript)) {
+    transcript:  (impl (TranscriptWrite<<MultilinearBrakedown<F, Blake2s, BrakedownSpec6> as PolynomialCommitmentScheme<F>>::CommitmentChunk, F>) + InMemoryTranscript)) {
 
     println!("\nstarting verifier");
     let width = endX - startX;
     let height = endY - startY;
-
     // Initialization of commits for opening purposes probably
     let mut commits = Vec::new();
     let mut my_alphas = Vec::new();
-
     //Initialization of file
     let fileName = format!("images/Crop{}.json", numCols);
     let cropImg = load_image(&fileName);
-
-    //Below we do padding, prover works with padded image, but later sends the unpadded commitment to verifier (this is fine as unpadded effectively has padding as 0)
+ 
     let mut RGBEvalsCrop =
         [fieldVec::<F>(&cropImg.R.iter().map(|&x| x as u64).collect::<Vec<_>>()),
         fieldVec::<F>(&cropImg.G.iter().map(|&x| x as u64).collect::<Vec<_>>()),
         fieldVec::<F>(&cropImg.B.iter().map(|&x| x as u64).collect::<Vec<_>>()),
         ]; 
-
-    // Doing transcript init stuff with 
+    // Doing transcript init stuff
     let trans_pf = transcript.into_proof();
 
     println!("PROOF SIZE: {:?} bytes", trans_pf.len());
@@ -736,10 +799,8 @@ fn verify(
 
     // Squeeze challenges for sumcheck
     let challenges: Vec<F> = vec![ <VT as FieldTranscript<F>>::squeeze_challenge(&mut ver_transcript)];
-
     // Squeeze rand_vec for sumcheck
     let rand_vector = <VT as FieldTranscript<F>>::squeeze_challenges(&mut ver_transcript,  numCols);
-
     // Verify sumcheck
 
     let mut mySumVals = [F::ZERO,F::ZERO,F::ZERO];
@@ -790,7 +851,6 @@ fn verify(
     // Calculate sum for sumcheck
     let mut mySumVals = [F::ZERO,F::ZERO,F::ZERO];
     for j in 0..((1<<nvCrop)){
-
         mySumVals[0] += frievaldCrop[j]*RGBEvalsCrop[0][j];
         mySumVals[1] += frievaldCrop[j]*RGBEvalsCrop[1][j];
         mySumVals[2] += frievaldCrop[j]*RGBEvalsCrop[2][j];
@@ -800,25 +860,140 @@ fn verify(
     let verResImgTransform =  ClassicSumCheck::<EvaluationsProver<F>>::verify(&(), numCols, 2, mySum, &mut ver_transcript).unwrap();
     my_alphas.push(verResImgTransform.1);
 
-    // Verify Openings
-
     let points = makePtsFullCrop(numCols, my_alphas.clone());
 
-    let evals2: Vec<F> = ver_transcript.read_field_elements(evals.len()).unwrap();
-    let mut my_evals = Vec::new();
-    
-    for i in 0..evals.len(){
-        let mut newEval = evals[i].clone();
-        newEval.value = evals2[i];
-        my_evals.push(newEval);
-    }
+    let mut hpoints_vec = Vec::new();
+    let mut hevals_vec2 = Vec::new();
 
-    Pcs::batch_verify(
-        &vp, 
-        &commits, 
-        &points, 
-        &my_evals, 
-        &mut ver_transcript).unwrap();
+    let mut fracpoints_vec = Vec::new();
+    let mut fracevals_vec2 = Vec::new();
+
+    let mut prodpoints_vec = Vec::new();
+    let mut prodevals_vec2 = Vec::new();
+
+    let mut imgpoints_vec = Vec::new();
+    let mut imgevals_vec2 = Vec::new();
+
+    for i in 0..3{
+        let imgChnlInd = i;
+        let prodInd = 5+i*3;
+        let fracInd = 4+i*3;
+        let hInd = 3+i*3;
+    
+        // MAKE H
+        let mut hpoints_0 = Vec::new();
+        hpoints_0.push(points[1].clone());
+        hpoints_0.push(points[3+i*6].clone());
+        hpoints_0.push(points[4+i*6].clone());
+        hpoints_0.push(points[5+i*6].clone());
+
+        hpoints_vec.push(hpoints_0.clone());
+
+        let h_evals: Vec<F> = ver_transcript.read_field_elements(hevals_vec[i].len()).unwrap();
+        let mut hevals2= Vec::new();
+        
+        for j in 0..hevals_vec[i].len(){
+            let mut newEval = hevals_vec[i][j].clone();
+            newEval.value = h_evals[j];
+            hevals2.push(newEval);
+        }
+
+        hevals_vec2.push(h_evals.clone());
+    
+        batch_verify_one::<F, Pcs>(
+            &vp,
+            numCols+1,
+            commits[hInd].clone(),
+            &hpoints_0,
+            &hevals2,
+            &mut ver_transcript,
+        ).unwrap();
+
+        // make FRAC
+        let mut fracpoints_0 = Vec::new();
+        fracpoints_0.push(points[6+i*6].clone());
+        fracpoints_0.push(points[7+i*6].clone());
+        fracpoints_0.push(points[8+i*6].clone());
+
+        fracpoints_vec.push(fracpoints_0.clone());
+
+        let frac_evals: Vec<F> = ver_transcript.read_field_elements(fracevals_vec[i].len()).unwrap();
+        let mut fracevals2= Vec::new();
+        
+        for j in 0..fracevals_vec[i].len(){
+            let mut newEval = fracevals_vec[i][j].clone();
+            newEval.value = frac_evals[j];
+            fracevals2.push(newEval);
+        }
+        
+        fracevals_vec2.push(frac_evals.clone());
+
+        batch_verify_one::<F, Pcs>(
+            &vp,
+            numCols+1,
+            commits[fracInd].clone(),
+            &fracpoints_0,
+            &fracevals2,
+            &mut ver_transcript,
+        ).unwrap();
+        
+        // make PROD
+        let mut prodpoints_0 = Vec::new();
+        prodpoints_0.push(points[2].clone());
+        prodpoints_0.push(points[6+i*6].clone());
+        prodpoints_0.push(points[7+i*6].clone());
+        prodpoints_0.push(points[8+i*6].clone());
+
+        prodpoints_vec.push(prodpoints_0.clone());
+
+        let prod_evals: Vec<F> = ver_transcript.read_field_elements(prodevals_vec[i].len()).unwrap();
+        let mut prodevals2= Vec::new();
+        
+        for j in 0..prodevals_vec[i].len(){
+            let mut newEval = prodevals_vec[i][j].clone();
+            newEval.value = prod_evals[j];
+            prodevals2.push(newEval);
+        }
+        
+        prodevals_vec2.push(prod_evals.clone());
+
+        batch_verify_one::<F, Pcs>(
+            &vp,
+            numCols+1,
+            commits[prodInd].clone(),
+            &prodpoints_0,
+            &prodevals2,
+            &mut ver_transcript,
+        ).unwrap();
+
+        // make IMG
+        let mut imgpoints_0 = Vec::new();
+        imgpoints_0.push(points[0].clone());
+        imgpoints_0.push(points[points.len()-3+i].clone());
+        imgpoints_0.push(points[21].clone());
+
+        imgpoints_vec.push(imgpoints_0.clone());
+
+        let img_evals: Vec<F> = ver_transcript.read_field_elements(imgevals_vec[i].len()).unwrap();
+        let mut imgevals2= Vec::new();
+        
+        for j in 0..imgevals_vec[i].len(){
+            let mut newEval = imgevals_vec[i][j].clone();
+            newEval.value = img_evals[j];
+            imgevals2.push(newEval);
+        }
+        
+        imgevals_vec2.push(img_evals.clone());
+
+        batch_verify_one::<F, Pcs>(
+            &vp,
+            numCols+1,
+            commits[imgChnlInd].clone(),
+            &imgpoints_0,
+            &imgevals2,
+            &mut ver_transcript,
+        ).unwrap();
+    }
 
     // We have done all the opening proofs. Now it's JUST point equality.
 
@@ -843,7 +1018,7 @@ fn verify(
     }
 
     let LHS = rTAPoly.evaluate(&rTApt);
-    let mut RHS = evals2[11] + alpha_1Hash*evals2[25] + alpha_2Hash*evals2[39];
+    let mut RHS = imgevals_vec2[0][0] + alpha_1Hash*imgevals_vec2[1][0] + alpha_2Hash*imgevals_vec2[2][0];
     let mut success = true;
     success = success && (verResCameraHash.0 == LHS*RHS);
 
@@ -870,17 +1045,15 @@ fn verify(
         transPoint.push(points[21][i]);
     }
     let LHS = permTimesRPoly.evaluate(&transPoint);
-
-    let mut RHS = evals2[13] + alpha_1Trans*evals2[27] + alpha_2Trans*evals2[41];
-
+    let mut RHS = imgevals_vec2[0][2] + alpha_1Trans*imgevals_vec2[1][2] + alpha_2Trans*imgevals_vec2[2][2];
     success = success && (verResImgTransform.0 == LHS*RHS);
 
     // Verify h and v are done correctly in range check
     for i in 0..3{
-        success = success && (evals2[i*11+3*i] == F::ZERO);
-        success = success && (evals2[4+i*11+3*i] == F::ONE);
+        success = success && (hevals_vec2[i][0] == F::ZERO);
+        success = success && (prodevals_vec2[i][0] == F::ONE);
     }
-    
+
     // Verify the range check
     // Make the embedded tables 
     let primPolyForT = irredPolyTable[numCols] as u64;
@@ -911,7 +1084,7 @@ fn verify(
     }
     let polyTable = MultilinearPolynomial::new(embeddedTable.clone());
     let polyPlusOneTable = MultilinearPolynomial::new(plusOneTable.clone());
-    // 
+    
     for i in 0..3{
         let myRand = &points[3+i*6];
         let startVal = myRand[0];
@@ -920,20 +1093,19 @@ fn verify(
             myRandSmall.push(myRand[i]);
         }
         let lastVal = myRand[myRand.len()-1];
-        let imgAtAlphaSmall = evals2[11*(i+1) + i*3 + 1];
-        let hAtAlphaRange =  evals2[1+11*i+i*3];
-        let hAtAlphaRangeFiddle = evals2[2+11*i+i*3];
-        let hAtAlphaRange0 =  evals2[3+11*i+i*3];  
-        let prodAtAlphaRange = evals2[5+11*i+i*3];
-        let fracAtAlphaRange = evals2[6+11*i+i*3];
-        let prodAtAlphaRange0 = evals2[7+11*i+i*3];
-        let fracAtAlphaRange0 = evals2[8+11*i+i*3];
-        let prodAtAlphaRange1 = evals2[9+11*i+i*3];
-        let fracAtAlphaRange1 = evals2[10+11*i+i*3];
-    
+        let imgAtAlphaSmall = imgevals_vec2[i][1];
+        let hAtAlphaRange =  hevals_vec2[i][1];
+        let hAtAlphaRangeFiddle = hevals_vec2[i][2];
+        let hAtAlphaRange0 =  hevals_vec2[i][3];  
+        let prodAtAlphaRange = prodevals_vec2[i][1];
+        let fracAtAlphaRange = fracevals_vec2[i][0];
+        let prodAtAlphaRange0 = prodevals_vec2[i][2];
+        let fracAtAlphaRange0 = fracevals_vec2[i][1];
+        let prodAtAlphaRange1 = prodevals_vec2[i][3];
+        let fracAtAlphaRange1 = fracevals_vec2[i][2];
+        
         // We first compute prod(x) - v(x,0)v(x,1)
         let mut firstHalf = prodAtAlphaRange;
-
         let myAlpha = myRand[myRand.len()-1]; 
         let vX0 = myAlpha * prodAtAlphaRange0 + (F::ONE- myAlpha) * fracAtAlphaRange0;
         let vX1 =  myAlpha * prodAtAlphaRange1 + (F::ONE- myAlpha) * fracAtAlphaRange1;
@@ -944,7 +1116,6 @@ fn verify(
         // alpha0 + merge(I,T)(X) + alpha1 merge(I,T_{+1})(X)
 
         let mut f1 = alpha1[i] + ((F::ONE- lastVal) * imgAtAlphaSmall + lastVal * (polyTable.evaluate(&myRandSmall)));
-
         f1 += alpha2[i] * ((F::ONE - lastVal) * imgAtAlphaSmall + lastVal* polyPlusOneTable.evaluate(&myRandSmall));
         // alpha0 + h(X) + alpha1 h_{+1}(X)
 
@@ -953,7 +1124,7 @@ fn verify(
         secondHalf = secondHalf * betas[i];
 
         let anticipatedVal = verResRangeRGB[i].0;
-
+        
         let finalVal = firstHalf+secondHalf;
 
         let mut my_zero_vec = Vec::new();
@@ -963,18 +1134,20 @@ fn verify(
         }
 
         let extra = eq_eval(&myRand,&maybeChallengeVecs[i]);
-        
+
+        // gates(alpha) = finalVAL
+        // anticipatedVal = gates(alpha)*eq_thingy(alpha)
         success = success && (anticipatedVal == finalVal * extra);
-
     }
-
+    
     println!("Verifier passed!: {:?}", success);
-
-    println!("verifier done!\n");    
+    
+    println!("verifier done!\n");  
 }
 
-fn run_whole_system_crop_basefold(input_size: usize) {
 
+
+fn run_whole_system_crop_brake(input_size: usize) {
     // defining various sizes
     let numCols = input_size;
     let nvCrop = input_size-1;
@@ -986,16 +1159,16 @@ fn run_whole_system_crop_basefold(input_size: usize) {
 
     // now we begin proving
     let prover_start = Instant::now();
-    
-    let (origWidth, origHeight, startX, startY, endX, endY, evals, transcript) = prove(pp, input_size, numRows, numCols, nvCrop);
+
+    let (origWidth, origHeight, startX, startY, endX, endY, hevals_vec, fracevals_vec, prodevals_vec, imgevals_vec, transcript) = prove(pp, input_size, numRows, numCols, nvCrop);
 
     let elapsed_prover = prover_start.elapsed();
     println!("PROVER TIME: {:?} seconds", elapsed_prover.as_millis() as f64 / 1000 as f64);
-    
+
     // now verify
     let verifier_start: Instant = Instant::now();
 
-    verify(vp, numRows, numCols, nvCrop, origWidth, origHeight, startX, startY, endX, endY, evals, digestRGB, transcript);
+    verify(vp, numRows, numCols, nvCrop, origWidth, origHeight, startX, startY, endX, endY, hevals_vec, fracevals_vec, prodevals_vec, imgevals_vec, digestRGB, transcript);
 
     let elapsed_verifier = verifier_start.elapsed();
     println!("VERIFIER TIME: {:?} seconds", elapsed_verifier.as_millis() as f64 / 1000 as f64);
@@ -1013,8 +1186,8 @@ fn main(){
 
     for i in first_size..last_size+1 {
         println!("-----------------------------------------------------------------------");
-        println!("Full System Crop, HyperVerITAS Basefold. Size: 2^{:?}\n", i);
-        let _res = run_whole_system_crop_basefold(i);
+        println!("Full System Crop, HyperVerITAS Brakedown 64. Size: 2^{:?}\n", i);
+        let _res = run_whole_system_crop_brake(i);
         println!("-----------------------------------------------------------------------");
     }
 }
