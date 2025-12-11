@@ -1,5 +1,8 @@
+This implementation is a fork of the github repository Privacy-PreservingProofs4EditedPhotos found <a href="https://github.com/pierpaolodm/Privacy-PreservingProofs4EditedPhotos">here</a>.
 
-<div align="center">
+INSTRUCTIONS TO COME
+
+<!-- <div align="center">
 <h2>Trust Nobody: Privacy-Preserving Proofs for Edited Photos with Your Laptop</h2>
 
 **Pierpaolo Della Monica**,   **Ivan Visconti**,  **Andrea Vitaletti**  and  **Marco Zecchini**
@@ -19,4 +22,4 @@ In this work, we introduce a novel system for proving and verifying the authenti
 3) **Authenticity** – only the advertised transformations have been applied,  
 4) **Fast Fraud Detection** – enabling rapid identification of fraudulent proofs.
 
-Our contributions include new definitions that model confidentiality and adaptive adversaries, techniques to accelerate the prover, and an efficient construction based on custom signatures and hashes. We also propose a less efficient construction utilizing signatures and hashes from the C2PA specifications. Experimental results confirm the practicality of our approach, allowing the computation of authentic transformations of high-resolution images on standard computing resources. Prior work either demands expensive computing power or fails to meet confidentiality requirements.
+Our contributions include new definitions that model confidentiality and adaptive adversaries, techniques to accelerate the prover, and an efficient construction based on custom signatures and hashes. We also propose a less efficient construction utilizing signatures and hashes from the C2PA specifications. Experimental results confirm the practicality of our approach, allowing the computation of authentic transformations of high-resolution images on standard computing resources. Prior work either demands expensive computing power or fails to meet confidentiality requirements. -->
