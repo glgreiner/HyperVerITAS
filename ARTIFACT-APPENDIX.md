@@ -72,85 +72,82 @@ describe the experiments that support your claims in the subsection after that.
 
 ### Main Results and Claims
 
-List all your paper's results and claims that are supported by your submitted
-artifacts.
+#### Main Result 1: Full System Crop on Laptop
 
-#### Main Result 1: Name
+Table 3 in our paper compares HyperVerITAS to other existing image provenance proof systems for proving the crop transformation on a laptop. We recorded four metrics: prover runtime, verifier runtime, prove peak memory, and proof size. We found that HyperVerITAS outperforms prior work (VerITAS, VIMz, and TilesProof) in prover time for cropping 50% of the image on a laptop for various image sizes (2^19 to 2^25).
 
-Describe the results in 1 to 3 sentences. Mention what the independent and
-dependent variables are; independent variables are the ones on the x-axes of
-your figures, whereas the dependent ones are on the y-axes. By varying the
-independent variable (e.g., file size) in a given manner (e.g., linearly), we
-expect to see trends in the dependent variable (e.g., runtime, communication
-overhead) vary in another manner (e.g., exponentially). Refer to the related
-sections, figures, and/or tables in your paper and reference the experiments
-that support this result/claim. See example below.
+#### Main Result 2: HyperVerITAS vs VerITAS Crop on Laptop
 
-#### Main Result 2: Example Name
+In Figure 7 (the top part), we compare HyperVerITAS to VerITAS when instantiated with a variety of different Polynomial Commitment Schemes. Notice that regardless of the PCS HyperVerITAS is instantiated with, it outperforms VerITAS in prover runtime (as well as memory).
 
-Our paper claims that when varying the file size linearly, the runtime also
-increases linearly. This claim is reproducible by executing our
-[Experiment 2](#experiment-2-example-name). In this experiment, we change the
-file size linearly, from 2KB to 24KB, at intervals of 2KB each, and we show that
-the runtime also increases linearly, reaching at most 1ms. We report these
-results in "Figure 1a" and "Table 3" (Column 3 or Row 2) of our paper.
+#### Main Result 3: Full System Grayscale on Laptop
+
+Table 7 in our paper compares HyperVerITAS to other existing image provenance proof systems for proving the grayscale transformation on a laptop. We recorded four metrics: prover runtime, verifier runtime, prove peak memory, and proof size. We found that HyperVerITAS outperforms prior work (VerITAS, VIMz, and TilesProof) in prover time for grayscale on a laptop for various image sizes (2^19 to 2^25).
 
 ### Experiments
-List each experiment to execute to reproduce your results. Describe:
- - How to execute it in detailed steps.
- - What the expected result is.
- - How long it takes to execute in human and compute times (approximately).
- - How much space it consumes on disk (approximately) (omit if <10GB).
- - Which claim and results does it support, and how.
 
-#### Experiment 1: Name
-- Time: replace with estimate in human-minutes/hours + compute-minutes/hours.
-- Storage: replace with estimate for disk space used (omit if <10GB).
+#### Experiment 1: Full System Crop
+- Time: 30 minutes Human time + 3 compute hours
+- Storage: ~70GB
 
-Provide a short explanation of the experiment and expected results. Describe
-thoroughly the steps to perform the experiment and to collect and organize the
-results as expected from your paper (see example below). Use code segments to
-simplify the workflow, as follows.
+You need to run the crop experiments for:
+- VerITAS KZG `(comparisons/VerITAS_KZG/README.md)`
+- VerITAS FRI `(comparisons/VerITAS_FRI/README.md)`
+- HyperVerITAS PST `(./README.md)`
+- HyperVerITAS Brakedown (127) `(./README.md)`
+- VIMz `(comparisons/vimz/README.md)`
+- TilesProof `(comparisons/TilesProof/README.md)`
 
-```bash
-python3 experiment_1.py
-```
+Details on how to run these experiments are included in the respective README files. For each of the above Schemes, the crop experiment needs to be run for input sizes 2^19, 2^20, ..., 2^25 (or until it crashes due to memory error).
 
-#### Experiment 2: Example Name
+These experiments support Claim 1, as these results were used to make Table 3.
 
-- Time: 10 human-minutes + 3 compute-hours
-- Storage: 20GB
+We expect to see HyperVerITAS Brakedown (127) outperform all other schemes in prover runtime.
 
-This example experiment reproduces
-[Main Result 2: Example Name](#main-result-2-example-name), the following script
-will run the simulation automatically with the different parameters specified in
-the paper. (You may run the following command from the example Docker image.)
+#### Experiment 2: HyperVerITAS vs VerITAS Crop on Laptop
 
-```bash
-python3 main.py
-```
+- Time: 30 minutes Human time + 6 compute hours
+- Storage: ~20GB
 
-Results from this example experiment will be aggregated over several iterations
-by the script and output directly in raw format along with variances and
-standard deviations in the `output-folder/` directory. You will also find there
-the plots for "Figure 1a" in `.pdf` format and the table for "Table 3" in `.tex`
-format. These can be directly compared to the results reported in the paper, and
-should not quantitatively vary by more than 5% from expected results.
+You need to run the crop experiments for:
+- VerITAS KZG `(comparisons/VerITAS_KZG/README.md)`
+- VerITAS FRI `(comparisons/VerITAS_FRI/README.md)`
+- HyperVerITAS PST `(./README.md)`
+- HyperVerITAS Brakedown (64) `(./README.md)`
+- HyperVerITAS Brakedown (127) `(./README.md)`
+- HyperVerITAS Brakedown (256) `(./README.md)`
+- HyperVerITAS Basefold `(./README.md)`
+- HyperVerITAS BasefoldFri `(./README.md)`
+- HyperVerITAS ZeromorphFri `(./README.md)`
 
+Details on how to run these experiments are included in the respective README files. For each of the above Schemes, the crop experiment needs to be run for input sizes 2^19, 2^20, ..., 2^25 (or until it crashes due to memory error).
+
+These experiments support Claim 2, as these results were used to make the top graph seen in Figure 7.
+
+We expect to see HyperVerITAS (with any PCS) outperform VerITAS in prover runtime.
+
+#### Experiment 3: Full System Grayscale
+- Time: 30 minutes Human time + 3 compute hours
+- Storage: ~70GB
+
+You need to run the grayscale experiments for:
+- VerITAS KZG `(comparisons/VerITAS_KZG/README.md)`
+- VerITAS FRI `(comparisons/VerITAS_FRI/README.md)`
+- HyperVerITAS PST `(./README.md)`
+- HyperVerITAS Brakedown (127) `(./README.md)`
+- VIMz `(comparisons/vimz/README.md)`
+- TilesProof `(comparisons/TilesProof/README.md)`
+
+Details on how to run these experiments are included in the respective README files. For each of the above Schemes, the grayscale experiment needs to be run for input sizes 2^19, 2^20, ..., 2^25 (or until it crashes due to memory error).
+
+These experiments support Claim 3, as these results were used to make Table 7 in our paper.
+
+We expect to see HyperVerITAS Brakedown (127) outperform all other schemes in prover runtime.
 
 ## Limitations (Required for Functional and Reproduced badges)
 
-Describe which steps, experiments, results, graphs, tables, etc. are _not
-reproducible_ with the provided artifact. Explain why this is not
-included/possible and argue why the artifact should _still_ be evaluated for the
-respective badges.
+Although we didn't provide credits to fund an AWS server to replicate the experiments we did on the high-memory AWS server, the main goal of that experiment was to show that even with higher memory, the same trends that we saw on the laptop still hold (i.e HyperVerITAS outperforms VerITAS). So although it won't produce AWS results, the results produced on the laptop should demonstrate the trends effectively. Further, if one had an AWS server, they could clone the github repo and follow the instructions to reproduce those results.
 
 ## Notes on Reusability (Encouraged for all badges)
 
-First, this section might not apply to your artifacts. Describe how your
-artifact can be used beyond your research paper, e.g., as a general framework.
-The overall goal of artifact evaluation is not only to reproduce and verify your
-research but also to help other researchers to re-use and extend your artifacts.
-Discuss how your artifacts can be adapted to other settings, e.g., more input
-dimensions, other datasets, and other behavior, through replacing individual
-modules and functionality or running more iterations of a specific module.
+Our artifact not only provides an implementation for HyperVerITAS, but also provides some value beyond our proof scheme. In particular, we found a bug in the implementation of the Brakedown PCS in the plonkish_basefold repository during our implementation that caused errors in the verify method. We solved this bug and provided a solution in our forked version of plonkish_basefold (which one can find in the HyperVerITAS github repo). This is useful to the broader research community, as they can now utilize this implementation to the fullest. 
