@@ -18,7 +18,7 @@ Implementation for the HyperVerITAS proof system
 > [!NOTE]
 > This code has run on multiple systems, but we note that it successfully runs on machines with the following specs:
 > - Ubuntu @ 24.04
-> - rustc @ 1.86.0-nightly
+> - rustc @ 1.94.0-nightly
 > - python @ 3.12.1
 
 ### Installing HyperVerITAS
@@ -44,6 +44,8 @@ Implementation for the HyperVerITAS proof system
 
   - To run the code, navigate to `HyperVerITAS/hyperveritas_impl/`
   - Run the commmand: `time -v cargo run --release --example <filename> <size>`. Some example usage:
-     - `time -v cargo run --release --example hv_crop_brakedown 19` HyperVerITAS with Brakedown PCS, Cropping 50%, Image size 2^19
-     - `time -v cargo run --release --example hv_gray_pst 22` HyperVerITAS with PST PCS, Grayscale, Image size 2^22
+    - HyperVerITAS with Brakedown PCS, Cropping 50%, Image size 2^19
+      - `time -v cargo run --release --example hv_crop_brakedown 19`
+    - HyperVerITAS with PST PCS, Grayscale, Image size 2^22
+      - `time -v cargo run --release --example hv_gray_pst 22`
   
