@@ -49,7 +49,7 @@ def generate_proof_resize(image_path,tiles_num,rh,rw,POT_PATH):
 
     for i,tile in enumerate(tiles):
         resize_tile = resize_image(tile,rh,rw)
-        generate_circuit_input(tile,resize_tile,f'tile_{i}.json')
+        generate_circuit_input_resize(tile,resize_tile,f'tile_{i}.json')
 
         input_parameters = {'HFULL':tile.shape[0],
                             'WFULL':tile.shape[1],

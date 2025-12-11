@@ -11,7 +11,7 @@ fi
 
 
 #define the base path for the circuit library
-CIRCOMLIB_PATH=/usr/local/lib/node_modules
+CIRCOMLIB_PATH=./node_modules
 
 #get the file name without the extension
 filename=$(basename -- "$1")
