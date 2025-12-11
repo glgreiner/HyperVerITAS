@@ -9,9 +9,9 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 
 2) Run the setup script as follows:
    
-```
-./veritas_fri_setup.sh
-```
+  ```
+  ./veritas_fri_setup.sh
+  ```
 
 ## Benchmarks
 
@@ -27,9 +27,9 @@ This directory contains the Full System Implementation for VerITAS's proof syste
 
 - Grayscale:
 
-```
-/usr/bin/time -v cargo run --release --example fullGrayFri <size>
-```
+  ```
+  /usr/bin/time -v cargo run --release --example fullGrayFri <size>
+  ```
 
 - Note `<size>` is the input size (2^size number of pixels). Valid choices are numbers between 19-25.
 
