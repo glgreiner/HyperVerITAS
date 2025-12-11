@@ -3,7 +3,7 @@ This repository contains the implementation for the HyperVerITAS proof system (c
 
 We also include code for performing a fair comparison with VerITAS, VIMz, and TilesProof. See the `comparisons` directory for more information.
 
-## Genearal Installation
+## General Installation
 > [!NOTE]
 > This code has run on multiple systems, but we note that it successfully runs on machines with the following specs:
 > - Ubuntu @ 24.04
@@ -11,11 +11,11 @@ We also include code for performing a fair comparison with VerITAS, VIMz, and Ti
 > - python @ 3.12.1
 > For Reviewers, these instructions have successfully executed on the `Compute VM` provided in HotCRP.
 
-- Clone the github repo
+1) Clone the github repo
 ```
 git clone https://github.com/glgreiner/HyperVerITAS.git
 ```
-- Run the Installation Script. Note you will need to interact a few times during the installation progress, as you will need to type '1' during the Rust installation, and 'y' a few times during the installation process to accept downloads.
+2) Run the Installation Script. Note you will need to interact a few times during the installation progress, as you will need to type '1' during the Rust installation, and 'y' a few times during the installation process to accept downloads.
 ```
 cd HyperVerITAS
 ./install.sh
