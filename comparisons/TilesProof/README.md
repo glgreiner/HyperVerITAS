@@ -36,6 +36,6 @@ This implementation is a fork of the github repository Privacy-PreservingProofs4
       python verify_proof.py --circuit tile_0
       ```
 
- - The command will print out the **Prover Runtime**, **Verifier Runtime**, **Proof Size**, and **Prover Peak Memory**, the four metrics we record in our paper.
+ - The command will print out the **Prover Runtime**, **Verifier Runtime**, and **Prover Peak Memory**. To get **Proof Size**, you can manually check the size of the `proof.json` file found in the directory `TilesProof/output/snarkjs_circuit/tile_0`. You can use the command `ls -lh` to see the size of the file in bytes.
    
  - Once you have those metrics for 1 tile, we can generate metrics for any image size. We determine how many tiles are needed to cover the given image, and then multiply each metric (for 1 tile) by that number to obtain the final values.
