@@ -5,7 +5,10 @@ This implementation is a fork of the github repository VIMz found <a href="https
 1) Ensure you are in the directory: `HyperVerITAS/comparisons/vimz`
 
 2) Run the setup script as follows:
-```./vimz_setup.sh```
+   
+```
+./vimz_setup.sh
+```
 
 ## Benchmarks
 
@@ -30,10 +33,14 @@ source py_modules/vimz/bin/activate
 
     - VIMz Crop for input image size 2^19
       
-    ```./benchmark.sh 19 crop```
+    ```
+    ./benchmark.sh 19 crop
+    ```
    
     - VIMz Grayscale for input image size 2^22
       
-    ```./benchmark.sh 22 grayscale```
+    ```
+    ./benchmark.sh 22 grayscale
+    ```
 
  - The command will print out the **Prover Runtime**, **Verifier Runtime**, **Proof Size**, and **Prover Peak Memory**, the four metrics we record in our paper. The prover runtime is calculated by adding the times for `RecursiveSNARK creation` and `CompressedSNARK::prove`. Verifier runtime comes from the line with `CompressedSNARK::verify`. The prover peak memory is output in the line titled `Maximum resident set size (kbytes)`.
